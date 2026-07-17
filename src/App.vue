@@ -6,61 +6,115 @@
       <button @click="openAdmin" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; font-size: 1.2rem; cursor: pointer;" title="Acesso Admin">🔒</button>
 
       <h1 style="color: #c62828; font-size: 2.2rem; margin-top: 0;">🎅 Natal 2026 🎄</h1>
-      <p style="color: #555; margin-bottom: 2rem; font-size: 1.1rem;">Selecione seu nome para entrar</p>
+      <p style="color: #555; margin-bottom: 2rem; font-size: 1.1rem;">Selecione seu nome e digite a senha</p>
       
-      <select v-model="nomeSelecionadoGlobally" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1.5rem;">
+      <select v-model="nomeSelecionadoGlobally" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1rem;">
         <option value="" disabled selected>👤 Quem é você?</option>
         <option v-for="p in participants" :key="p.name" :value="p.name">
           {{ p.name }}
         </option>
       </select>
+
+      <input type="password" v-model="senhaInput" placeholder="Sua Senha (4 dígitos)" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1.5rem; box-sizing: border-box;" v-if="nomeSelecionadoGlobally" />
       
-      <button @click="salvarNomeGlobal" :disabled="!nomeSelecionadoGlobally" style="width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s;" :style="nomeSelecionadoGlobally ? '' : 'opacity: 0.5; cursor: not-allowed;'">
+      <button @click="fazerLogin" :disabled="!nomeSelecionadoGlobally || !senhaInput" style="width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s;" :style="(nomeSelecionadoGlobally && senhaInput) ? '' : 'opacity: 0.5; cursor: not-allowed;'">
         Entrar
       </button>
     </div>
   </div>
 
   <!-- TELA DO ADMINISTRADOR (Isolada) -->
-  <div v-else-if="isAdmin" style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center;">
-    <div style="background: white; padding: 3rem 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 500px;">
-        <h3 style="color: #263238; margin-top: 0; font-size: 1.5rem;">⚙️ Painel do Administrador</h3>
-        <p style="font-size: 14px; color: #546e7a;">Edite a lista abaixo e clique no botão para apagar e gerar novo sorteio.</p>
-        <textarea v-model="adminNamesList" rows="12" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem;"></textarea>
-        <button @click="regerarSorteio" style="margin-top: 15px; padding: 12px; background: #E53935; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1.1rem;">🔄 Refazer Sorteio Oficial</button>
-        <button @click="isAdmin = false" style="margin-top: 10px; padding: 10px; background: #90a4ae; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1rem;">Sair do Painel</button>
+  <div v-else-if="isAdmin" style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem; display: flex; justify-content: center; align-items: flex-start;">
+    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 800px;">
+        <h3 style="color: #263238; margin-top: 0; font-size: 1.8rem; text-align: center;">⚙️ Painel do Administrador</h3>
+        
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+          <button @click="adminTab = 'sorteio'" :style="adminTab === 'sorteio' ? activeStyle : inactiveStyle">Sorteio</button>
+          <button @click="adminTab = 'senhas'" :style="adminTab === 'senhas' ? activeStyle : inactiveStyle">Senhas</button>
+          <button @click="adminTab = 'presentes'" :style="adminTab === 'presentes' ? activeStyle : inactiveStyle">Presentes</button>
+          <button @click="adminTab = 'ceia'" :style="adminTab === 'ceia' ? activeStyle : inactiveStyle">Cardápio</button>
+        </div>
+
+        <div v-if="adminTab === 'sorteio'" style="text-align: center;">
+          <p style="font-size: 14px; color: #546e7a;">Edite a lista abaixo e clique no botão para apagar e gerar novo sorteio.</p>
+          <textarea v-model="adminNamesList" rows="12" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem;"></textarea>
+          <button @click="regerarSorteio" style="margin-top: 15px; padding: 12px; background: #E53935; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1.1rem;">🔄 Refazer Sorteio Oficial</button>
+        </div>
+
+        <div v-if="adminTab === 'senhas'">
+          <h4 style="color: #333;">Participantes e Senhas</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #eee;">
+                <th style="padding: 10px; border: 1px solid #ccc;">Nome</th>
+                <th style="padding: 10px; border: 1px solid #ccc;">Senha Atual</th>
+                <th style="padding: 10px; border: 1px solid #ccc;">Alterou a Senha?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in adminParticipants" :key="p.name">
+                <td style="padding: 10px; border: 1px solid #ccc;">{{ p.name }}</td>
+                <td style="padding: 10px; border: 1px solid #ccc; font-family: monospace;">{{ p.password }}</td>
+                <td style="padding: 10px; border: 1px solid #ccc;">{{ p.passwordChanged ? '✅ Sim' : '❌ Não' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div v-if="adminTab === 'presentes'">
+          <h4 style="color: #333;">Gerenciar Presentes</h4>
+          <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+            <button @click="deletarPresentesSelecionados" style="padding: 8px 15px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Apagar Selecionados</button>
+            <button @click="deletarTodosPresentes" style="padding: 8px 15px; background: #b71c1c; color: white; border: none; border-radius: 5px; cursor: pointer;">Apagar TODOS</button>
+          </div>
+          <div v-for="p in adminPresentes" :key="p._id" style="padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" v-model="p.selecionado" style="width: 20px; height: 20px;" />
+            <div>
+              <strong>{{ p.nomeFamiliar }}</strong>: {{ p.item }} <span v-if="p.tamanhoEspecificacao">({{ p.tamanhoEspecificacao }})</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="adminTab === 'ceia'">
+          <h4 style="color: #333;">Gerenciar Cardápio</h4>
+          <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+            <button @click="deletarCeiaSelecionada" style="padding: 8px 15px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Apagar Selecionados</button>
+            <button @click="deletarTodaCeia" style="padding: 8px 15px; background: #b71c1c; color: white; border: none; border-radius: 5px; cursor: pointer;">Apagar TODOS</button>
+          </div>
+          <div v-for="c in adminCeia" :key="c._id" style="padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" v-model="c.selecionado" style="width: 20px; height: 20px;" />
+            <div>
+              <strong>{{ c.categoria }}</strong> - {{ c.nomePrato }} (Resp: {{ c.responsavel || 'Ninguém' }})
+            </div>
+          </div>
+        </div>
+
+        <button @click="sairAdmin" style="margin-top: 20px; padding: 10px; background: #90a4ae; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1rem;">Sair do Painel</button>
     </div>
   </div>
 
   <!-- SITE PRINCIPAL -->
   <div v-else style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem;">
-    <!-- CAIXA PRINCIPAL DO SITE -->
     <div style="background: white; text-align: center; font-family: sans-serif; padding: 2rem; width: 100%; max-width: 800px; margin: auto; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative;">
       
-      <!-- IDENTIFICAÇÃO DO USUÁRIO (Canto Superior Direito) -->
       <div style="position: absolute; top: 15px; right: 20px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: flex-end;">
           <span style="font-size: 0.9rem; font-weight: bold; color: #1565c0;">👤 {{ nomeSalvo }}</span>
+          <button @click="abrirPerfil" style="background: transparent; border: none; font-size: 0.8rem; color: #2196F3; cursor: pointer; text-decoration: underline; padding: 0;">⚙️ Perfil</button>
           <button @click="trocarUsuario" style="background: transparent; border: none; font-size: 0.8rem; color: #f44336; cursor: pointer; text-decoration: underline; padding: 0;">Sair</button>
-          <button @click="openAdmin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 0;" title="Acesso Admin">🔒</button>
+          <button v-if="nomeSalvo === 'Guilherme'" @click="openAdmin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 0;" title="Acesso Admin">🔒</button>
         </div>
       </div>
       
-      <!-- TÍTULO -->
-      <h1 style="color: #c62828; font-size: 2.2rem; margin-bottom: 20px;">🎅 Natal 2026 🎄</h1>
+      <h1 style="color: #c62828; font-size: 2.2rem; margin-bottom: 20px; margin-top: 30px;">🎅 Natal 2026 🎄</h1>
       
-      <!-- MENU DE NAVEGAÇÃO -->
       <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap;">
         <button @click="activeTab = 'sorteio'" :style="activeTab === 'sorteio' ? activeStyle : inactiveStyle">🎁 Amigo Secreto</button>
         <button @click="activeTab = 'ceia'" :style="activeTab === 'ceia' ? activeStyle : inactiveStyle">🍽️ Cardápio</button>
         <button @click="activeTab = 'presentes'" :style="activeTab === 'presentes' ? activeStyle : inactiveStyle">🛍️ Vitrine de Presentes</button>
       </div>
 
-      <!-- ========================================== -->
-      <!-- ABA 1: SORTEIO DO AMIGO SECRETO -->
-      <!-- ========================================== -->
       <div v-if="activeTab === 'sorteio'">
-
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; border: 2px dashed #ff9800; margin-bottom: 25px; text-align: left;">
           <h3 style="color: #e65100; margin: 0 0 10px 0; text-align: center;">📜 Regra do Jogo</h3>
           <ul style="margin: 0; padding-left: 20px; font-size: 1.1rem; color: #d84315; font-weight: bold; line-height: 1.5;">
@@ -68,22 +122,15 @@
           </ul>
         </div>
 
-        <!-- (Painel do Administrador isolado movido para fora) -->
-        <div v-if="savedLocally && !revealedName && !isAdmin" style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9; margin-top: 20px;">
-          <p style="font-size: 1.2rem; color: #1565c0; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto neste aparelho!</p>
-          <button @click="showSavedResult" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #1976D2; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
+        <div v-if="amigoSorteadoCache" style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9; margin-top: 20px;">
+          <p style="font-size: 1.2rem; color: #1565c0; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto!</p>
+          <button @click="mostrarAmigoSorteadoCache" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #1976D2; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
         </div>
 
-        <div v-if="!revealedName && !savedLocally">
+        <div v-else-if="!revealedName">
           <div>
             <p style="font-size: 1.2rem; color: #555;">Você está participando como <b>{{ nomeSalvo }}</b>.</p>
-            
-            <div v-if="participants.find(p => p.name === nomeSalvo)?.hasSeen" style="background: #ffebee; padding: 15px; border-radius: 8px; border: 1px solid #ef9a9a; margin-top: 15px;">
-              <p style="color: #c62828; font-weight: bold; margin: 0;">⚠️ Você já realizou o sorteio em outro aparelho!</p>
-              <p style="color: #e53935; font-size: 0.9rem; margin: 5px 0 0 0;">Se você não anotou quem tirou, peça para o administrador do sorteio verificar para você.</p>
-            </div>
-            
-            <button v-else @click="revealSecretSanta" style="padding: 15px; font-size: 18px; cursor: pointer; background: #4CAF50; font-weight: bold; color: white; border: none; border-radius: 8px; width: 100%; margin-top: 15px;">Revelar meu Amigo Secreto</button>
+            <button @click="revealSecretSanta" style="padding: 15px; font-size: 18px; cursor: pointer; background: #4CAF50; font-weight: bold; color: white; border: none; border-radius: 8px; width: 100%; margin-top: 15px;">Revelar meu Amigo Secreto</button>
           </div>
         </div>
 
@@ -104,12 +151,10 @@
         </div>
       </div>
 
-      <!-- ABA 2: CEIA -->
       <div v-if="activeTab === 'ceia'">
         <Ceia :participants="participants" :usuario-atual="nomeSalvo" />
       </div>
 
-      <!-- ABA 3: PRESENTES -->
       <div v-if="activeTab === 'presentes'">
         <Presentes :participants="participants" :usuario-atual="nomeSalvo" :filtro-inicial="filtroPresentesInicial" />
       </div>
@@ -124,43 +169,37 @@ import Swal from 'sweetalert2';
 import Ceia from './components/Ceia.vue';
 import Presentes from './components/Presentes.vue';
 
+const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : 'https://natal-bl3x.onrender.com';
+
 const activeTab = ref('sorteio');
 
 const activeStyle = 'background: #c62828; color: white; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s;';
 const inactiveStyle = 'background: #e0e0e0; color: #333; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s;';
 
 const participants = ref([]);
-const selectedName = ref('');
 const revealedName = ref('');
-const savedLocally = ref(false);
 const isAdmin = ref(false);
+const adminTab = ref('sorteio');
 const adminNamesList = ref('');
+const adminParticipants = ref([]);
+const adminPresentes = ref([]);
+const adminCeia = ref([]);
+
 const nomeSalvo = ref('');
+const amigoSorteadoCache = ref('');
+const senhaInput = ref('');
 const nomeSelecionadoGlobally = ref('');
 const filtroPresentesInicial = ref('');
+const adminPass = ref('');
 
 const irParaPresentes = (nome) => {
   filtroPresentesInicial.value = nome;
   activeTab.value = 'presentes';
 };
 
-const salvarNomeGlobal = () => {
-  if (nomeSelecionadoGlobally.value) {
-    localStorage.setItem('meuNome', nomeSelecionadoGlobally.value);
-    nomeSalvo.value = nomeSelecionadoGlobally.value;
-  }
-};
-
-const trocarUsuario = () => {
-  localStorage.removeItem('meuNome');
-  nomeSalvo.value = '';
-  nomeSelecionadoGlobally.value = '';
-  selectedName.value = '';
-};
-
 const fetchParticipants = async () => {
   try {
-    const res = await fetch('https://natal-bl3x.onrender.com/api/participants');
+    const res = await fetch(`${BASE_URL}/api/participants`);
     participants.value = await res.json();
   } catch (error) {
     console.error("Erro ao buscar participantes:", error);
@@ -169,74 +208,229 @@ const fetchParticipants = async () => {
 
 onMounted(() => {
   fetchParticipants();
-  if (localStorage.getItem('meuAmigoSecreto')) {
-    savedLocally.value = true;
-    nomeSalvo.value = localStorage.getItem('meuNome');
+  const storedUser = localStorage.getItem('loggedInUser');
+  if (storedUser) {
+    const userObj = JSON.parse(storedUser);
+    nomeSalvo.value = userObj.name;
+    amigoSorteadoCache.value = userObj.drawnName || '';
   }
 });
 
+const fazerLogin = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: nomeSelecionadoGlobally.value, password: senhaInput.value })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return Swal.fire('Erro', data.error || 'Senha incorreta', 'error');
+    }
+    
+    // Sucesso
+    nomeSalvo.value = data.participant.name;
+    if (data.participant.hasSeen) {
+      amigoSorteadoCache.value = data.participant.drawnName;
+    }
+    localStorage.setItem('loggedInUser', JSON.stringify({
+      name: data.participant.name,
+      drawnName: data.participant.hasSeen ? data.participant.drawnName : ''
+    }));
+    senhaInput.value = '';
+    
+  } catch(e) {
+    Swal.fire('Erro', 'Falha ao conectar ao servidor', 'error');
+  }
+};
+
+const trocarUsuario = () => {
+  localStorage.removeItem('loggedInUser');
+  nomeSalvo.value = '';
+  nomeSelecionadoGlobally.value = '';
+  senhaInput.value = '';
+  revealedName.value = '';
+  amigoSorteadoCache.value = '';
+  activeTab.value = 'sorteio';
+};
+
+const abrirPerfil = async () => {
+  const { value: formValues } = await Swal.fire({
+    title: 'Alterar Senha',
+    html:
+      '<input id="swal-old-pass" class="swal2-input" placeholder="Senha Atual" type="password">' +
+      '<input id="swal-new-pass" class="swal2-input" placeholder="Nova Senha (min 4 caracteres)" type="password">',
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Salvar',
+    cancelButtonText: 'Cancelar',
+    preConfirm: () => {
+      return [
+        document.getElementById('swal-old-pass').value,
+        document.getElementById('swal-new-pass').value
+      ]
+    }
+  });
+
+  if (formValues) {
+    const [oldPassword, newPassword] = formValues;
+    if (!oldPassword || !newPassword) return Swal.fire('Erro', 'Preencha os campos', 'warning');
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: nomeSalvo.value, oldPassword, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) return Swal.fire('Erro', data.error, 'error');
+      
+      Swal.fire('Sucesso!', 'Sua senha foi alterada.', 'success');
+    } catch(e) {
+      Swal.fire('Erro', 'Erro ao alterar senha', 'error');
+    }
+  }
+};
+
 const revealSecretSanta = async () => {
-  const nameToUse = nomeSalvo.value || selectedName.value;
   const result = await Swal.fire({
     title: 'É você mesmo?',
-    html: `Você confirma que é <b>${nameToUse}</b>?<br><br><small style="color: #d33;">Atenção: Só é possível sortear uma vez!</small>`,
+    html: `Você confirma que é <b>${nomeSalvo.value}</b>?<br><br><small style="color: #d33;">Atenção: Só é possível sortear uma vez!</small>`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#4CAF50',
     cancelButtonColor: '#d33',
     confirmButtonText: 'Sim, sou eu!',
-    cancelButtonText: 'Não, errei o nome'
+    cancelButtonText: 'Não'
   });
 
   if (!result.isConfirmed) return;
 
   try {
-    const res = await fetch('https://natal-bl3x.onrender.com/api/reveal', {
+    const res = await fetch(`${BASE_URL}/api/reveal`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: nameToUse })
+      body: JSON.stringify({ name: nomeSalvo.value })
     });
     const data = await res.json();
     if (!res.ok) return Swal.fire('Acesso Bloqueado', data.error || 'Erro ao revelar.', 'error');
     
     revealedName.value = data.drawnName;
-    localStorage.setItem('meuNome', nameToUse);
-    nomeSalvo.value = nameToUse;
-    localStorage.setItem('meuAmigoSecreto', data.drawnName);
-    savedLocally.value = true;
+    amigoSorteadoCache.value = data.drawnName;
+    
+    // Atualiza storage
+    localStorage.setItem('loggedInUser', JSON.stringify({
+      name: nomeSalvo.value,
+      drawnName: data.drawnName
+    }));
+    
     setTimeout(() => { Swal.fire({ title: '📸 Hora do Print!', text: 'Tire um PRINT da tela agora!', icon: 'warning', confirmButtonColor: '#3085d6' }); }, 500);
     await fetchParticipants();
   } catch (error) { Swal.fire('Erro!', 'Problema ao conectar com o servidor.', 'error'); }
 };
 
-const showSavedResult = () => {
-  revealedName.value = localStorage.getItem('meuAmigoSecreto');
+const mostrarAmigoSorteadoCache = () => {
+  revealedName.value = amigoSorteadoCache.value;
   setTimeout(() => { Swal.fire({ title: 'Lembrete!', text: 'Não esqueça de tirar o PRINT desta tela!', icon: 'info', confirmButtonColor: '#3085d6' }); }, 300);
 };
 
 const resetView = () => { revealedName.value = ''; };
 
+// ===============================
+// PAINEL DE ADMINISTRAÇÃO
+// ===============================
 const openAdmin = async () => {
   const { value: password } = await Swal.fire({ title: 'Área Restrita', input: 'password', inputPlaceholder: 'Digite a senha', showCancelButton: true });
-  if (password === 'admin123') { isAdmin.value = true; adminNamesList.value = participants.value.map(p => p.name).join('\n'); }
+  if (password === 'admin123') { 
+    isAdmin.value = true; 
+    adminPass.value = password;
+    adminNamesList.value = participants.value.map(p => p.name).join('\n');
+    await carregarDadosAdmin();
+  }
   else if (password) { Swal.fire('Erro', 'Senha incorreta', 'error'); }
+};
+
+const sairAdmin = () => {
+  isAdmin.value = false;
+  adminPass.value = '';
+};
+
+const carregarDadosAdmin = async () => {
+  try {
+    // Participantes/Senhas
+    let res = await fetch(`${BASE_URL}/api/admin/participants`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ password: adminPass.value })
+    });
+    adminParticipants.value = await res.json();
+
+    // Presentes
+    res = await fetch(`${BASE_URL}/api/presentes`);
+    let pData = await res.json();
+    adminPresentes.value = pData.map(x => ({...x, selecionado: false}));
+
+    // Ceia
+    res = await fetch(`${BASE_URL}/api/ceia`);
+    let cData = await res.json();
+    adminCeia.value = cData.map(x => ({...x, selecionado: false}));
+
+  } catch(e) {
+    console.error(e);
+  }
 };
 
 const regerarSorteio = async () => {
   const nomesArray = adminNamesList.value.split('\n').map(n => n.trim()).filter(n => n !== '');
   if (nomesArray.length < 3) return Swal.fire('Erro', 'Mínimo de 3 nomes.', 'warning');
-  const confirm = await Swal.fire({ title: 'Atenção!', text: 'Isso apaga o sorteio de todos.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#E53935', confirmButtonText: 'Refazer' });
+  const confirm = await Swal.fire({ title: 'Atenção!', text: 'Isso apaga o sorteio de todos e gera novas senhas!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#E53935', confirmButtonText: 'Refazer' });
   if (!confirm.isConfirmed) return;
   try {
-    const res = await fetch('https://natal-bl3x.onrender.com/api/admin/shuffle', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'admin123', names: nomesArray })
+    const res = await fetch(`${BASE_URL}/api/admin/shuffle`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPass.value, names: nomesArray })
     });
     const data = await res.json();
     if (data.success) {
-      Swal.fire('Sucesso!', 'Novo sorteio gerado!', 'success');
-      isAdmin.value = false; localStorage.clear(); savedLocally.value = false; revealedName.value = ''; selectedName.value = '';
+      Swal.fire('Sucesso!', 'Novo sorteio gerado! Senhas de 4 dígitos foram criadas para todos.', 'success');
       await fetchParticipants();
+      await carregarDadosAdmin();
     } else { Swal.fire('Erro', data.error, 'error'); }
   } catch (e) { Swal.fire('Erro', 'Falha no servidor.', 'error'); }
+};
+
+const deletarPresentesSelecionados = async () => {
+  const selecionados = adminPresentes.value.filter(p => p.selecionado).map(p => p._id);
+  if (selecionados.length === 0) return Swal.fire('Aviso', 'Nenhum presente selecionado.', 'info');
+  if (!(await Swal.fire({ title: 'Confirmar', text: 'Apagar presentes selecionados?', showCancelButton: true })).isConfirmed) return;
+
+  await fetch(`${BASE_URL}/api/admin/presentes/delete`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPass.value, ids: selecionados })
+  });
+  await carregarDadosAdmin();
+};
+
+const deletarTodosPresentes = async () => {
+  if (!(await Swal.fire({ title: 'Atenção!', text: 'Apagar TODOS os presentes?', icon: 'warning', showCancelButton: true })).isConfirmed) return;
+  await fetch(`${BASE_URL}/api/admin/presentes/delete`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPass.value, all: true })
+  });
+  await carregarDadosAdmin();
+};
+
+const deletarCeiaSelecionada = async () => {
+  const selecionados = adminCeia.value.filter(c => c.selecionado).map(c => c._id);
+  if (selecionados.length === 0) return Swal.fire('Aviso', 'Nenhum item selecionado.', 'info');
+  if (!(await Swal.fire({ title: 'Confirmar', text: 'Apagar itens do cardápio selecionados?', showCancelButton: true })).isConfirmed) return;
+
+  await fetch(`${BASE_URL}/api/admin/ceia/delete`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPass.value, ids: selecionados })
+  });
+  await carregarDadosAdmin();
+};
+
+const deletarTodaCeia = async () => {
+  if (!(await Swal.fire({ title: 'Atenção!', text: 'Apagar TODO o cardápio?', icon: 'warning', showCancelButton: true })).isConfirmed) return;
+  await fetch(`${BASE_URL}/api/admin/ceia/delete`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPass.value, all: true })
+  });
+  await carregarDadosAdmin();
 };
 </script>

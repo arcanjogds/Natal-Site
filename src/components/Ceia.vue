@@ -78,7 +78,8 @@ const props = defineProps({
 });
 
 const pratos = ref([]);
-const apiUrl = 'https://natal-bl3x.onrender.com/api/ceia';
+const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : 'https://natal-bl3x.onrender.com';
+const apiUrl = `${BASE_URL}/api/ceia`;
 
 const nomesFamilia = computed(() => props.participants.map(p => p.name));
 
