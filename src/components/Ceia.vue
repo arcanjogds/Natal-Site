@@ -1,17 +1,27 @@
 <template>
   <div style="background: #f1f8e9; padding: 20px; border-radius: 8px; border: 2px solid #8bc34a; margin-top: 20px; text-align: center;">
+    <img src="/img/ceia.jpg" alt="Ceia de Natal" style="width: 100%; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); object-fit: cover; max-height: 200px;">
+    
     <h2 style="color: #33691e; margin-top: 0;">🍽️ Cardápio da Ceia</h2>
     <p style="color: #558b2f; margin-bottom: 20px; font-size: 1.1rem;">Escolha o que você vai levar para a nossa ceia!</p>
 
-    <div v-for="prato in pratos" :key="prato._id" style="background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-      <div style="text-align: left;">
+    <div v-for="prato in pratos" :key="prato._id" style="background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: relative;">
+      <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 10px;">
+        <button @click="editarPrato(prato)" style="background: transparent; border: none; color: #1976d2; cursor: pointer; font-size: 1rem;" title="Editar Prato">✏️</button>
+        <button @click="deletarPrato(prato._id)" style="background: transparent; border: none; color: #f44336; cursor: pointer; font-size: 1.1rem;" title="Remover Prato">✖</button>
+      </div>
+
+      <div style="text-align: left; margin-top: 10px; flex-grow: 1;">
         <strong style="font-size: 1.2rem; color: #2e7d32;">{{ prato.nomePrato }}</strong>
         <span style="display: block; font-size: 0.85rem; color: #757575; text-transform: uppercase; margin-top: 3px;">{{ prato.categoria }}</span>
       </div>
-      <div v-if="prato.responsavel">
+      <div v-if="prato.responsavel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
         <span style="background: #e8f5e9; color: #2e7d32; padding: 8px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; border: 1px solid #c8e6c9;">
           ✅ {{ prato.responsavel }} vai levar
         </span>
+        <button @click="desistirPrato(prato._id, prato.nomePrato)" style="background: transparent; border: 1px solid #f44336; color: #f44336; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; cursor: pointer;">
+          Desistir
+        </button>
       </div>
       <button v-else @click="assumirPrato(prato._id, prato.nomePrato)" style="background: #ff9800; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;">
         🙋 Eu levo!
@@ -112,6 +122,63 @@ const adicionarPrato = async () => {
       Swal.fire('Adicionado!', 'O item entrou para o cardápio.', 'success');
       fetchPratos();
     } catch (error) { Swal.fire('Erro', 'Falha ao adicionar item.', 'error'); }
+  }
+};
+
+const editarPrato = async (prato) => {
+  const { value: formValues } = await Swal.fire({
+    title: 'Editar Prato',
+    html: `
+      <div style="text-align: left;">
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Nome do Prato:</label>
+        <input id="swal-edit1" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" value="${prato.nomePrato}">
+        
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Categoria do prato:</label>
+        <select id="swal-edit2" class="swal2-select" style="width: 100%; max-width: 100%; margin: 5px 0 10px 0;">
+          <option value="Principal" ${prato.categoria === 'Principal' ? 'selected' : ''}>Prato Principal</option>
+          <option value="Acompanhamento" ${prato.categoria === 'Acompanhamento' ? 'selected' : ''}>Acompanhamento</option>
+          <option value="Sobremesa" ${prato.categoria === 'Sobremesa' ? 'selected' : ''}>Sobremesa</option>
+          <option value="Bebida" ${prato.categoria === 'Bebida' ? 'selected' : ''}>Bebida</option>
+        </select>
+      </div>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonColor: '#8bc34a',
+    confirmButtonText: 'Salvar',
+    preConfirm: () => {
+      const nome = document.getElementById('swal-edit1').value;
+      const cat = document.getElementById('swal-edit2').value;
+      if (!nome) Swal.showValidationMessage('Digite o nome do prato!');
+      return { nomePrato: nome, categoria: cat };
+    }
+  });
+
+  if (formValues) {
+    try {
+      await fetch(`${apiUrl}/${prato._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formValues) });
+      Swal.fire('Atualizado!', 'Prato foi modificado.', 'success');
+      fetchPratos();
+    } catch (e) { Swal.fire('Erro', 'Não foi possível editar.', 'error'); }
+  }
+};
+
+const deletarPrato = async (id) => {
+  const confirm = await Swal.fire({ title: 'Apagar prato?', text: "Remover este item do cardápio?", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sim, apagar!' });
+  if (confirm.isConfirmed) {
+    try { await fetch(`${apiUrl}/${id}`, { method: 'DELETE' }); fetchPratos(); } 
+    catch (error) { Swal.fire('Erro', 'Não foi possível apagar.', 'error'); }
+  }
+};
+
+const desistirPrato = async (id, nomePrato) => {
+  const confirm = await Swal.fire({ title: 'Desistir?', text: `Deixar de levar o ${nomePrato}?`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#ff9800', confirmButtonText: 'Sim, desistir' });
+  if (confirm.isConfirmed) {
+    try {
+      await fetch(`${apiUrl}/${id}/assumir`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ responsavel: '' }) });
+      Swal.fire('Pronto', `O ${nomePrato} está livre novamente.`, 'success');
+      fetchPratos();
+    } catch (e) { Swal.fire('Erro', 'Não foi possível atualizar.', 'error'); }
   }
 };
 </script>

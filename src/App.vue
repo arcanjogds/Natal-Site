@@ -1,12 +1,11 @@
 <template>
-  <!-- FUNDO DINÂMICO QUE MUDA DE COR -->
-  <div :style="temaDeFundo" style="min-height: 100vh; padding: 2rem 1rem; transition: background 0.8s ease-in-out;">
+  <div style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem;">
     
-    <!-- CAIXA PRINCIPAL DO SITE (Fundo branco para leitura) -->
-    <div style="background: rgba(255, 255, 255, 0.95); text-align: center; font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+    <!-- CAIXA PRINCIPAL DO SITE -->
+    <div style="background: white; text-align: center; font-family: sans-serif; padding: 2rem; width: 100%; max-width: 800px; margin: auto; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); box-sizing: border-box;">
       
       <!-- TÍTULO -->
-      <h1 style="color: #c62828; font-size: 2.2rem; margin-bottom: 10px;">🎅 Natal 2026 🎄</h1>
+      <h1 style="color: #c62828; font-size: 2.2rem; margin-bottom: 20px;">🎅 Natal 2026 🎄</h1>
       
       <!-- MENU DE NAVEGAÇÃO -->
       <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap;">
@@ -19,11 +18,13 @@
       <!-- ABA 1: SORTEIO DO AMIGO SECRETO -->
       <!-- ========================================== -->
       <div v-if="activeTab === 'sorteio'">
-        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; border: 2px dashed #ff9800; margin-bottom: 25px;">
-          <h3 style="color: #e65100; margin: 0 0 10px 0;">📜 Regra do Sorteio</h3>
-          <p style="margin: 0; font-size: 1.2rem; color: #d84315; font-weight: bold;">
-            🎁 Valor do presente: Mínimo de R$ 150,00
-          </p>
+        <img src="/img/sorteio.jpg" alt="Amigo Secreto" style="width: 100%; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); object-fit: cover; max-height: 250px;">
+
+        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; border: 2px dashed #ff9800; margin-bottom: 25px; text-align: left;">
+          <h3 style="color: #e65100; margin: 0 0 10px 0; text-align: center;">📜 Regra do Jogo</h3>
+          <ul style="margin: 0; padding-left: 20px; font-size: 1.1rem; color: #d84315; font-weight: bold; line-height: 1.5;">
+            <li>🎁 Valor do presente: Mínimo de R$ 150,00</li>
+          </ul>
         </div>
 
         <div v-if="isAdmin" style="background: #eceff1; padding: 20px; border: 2px solid #607d8b; border-radius: 8px; margin-bottom: 20px; text-align: left;">
@@ -84,19 +85,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'; // <-- Importamos o 'computed' aqui
+import { ref, onMounted } from 'vue';
 import Swal from 'sweetalert2';
 import Ceia from './components/Ceia.vue';
 import Presentes from './components/Presentes.vue';
 
 const activeTab = ref('sorteio');
-
-// CORES DOS TEMAS (Degradês de Natal)
-const temaDeFundo = computed(() => {
-  if (activeTab.value === 'sorteio') return 'background: linear-gradient(135deg, #b71c1c 0%, #e53935 100%);'; // Tema Vermelho (Natal clássico)
-  if (activeTab.value === 'ceia') return 'background: linear-gradient(135deg, #e65100 0%, #ffb300 100%);'; // Tema Laranja (Madeira/Mesa da Ceia)
-  if (activeTab.value === 'presentes') return 'background: linear-gradient(135deg, #0d47a1 0%, #42a5f5 100%);'; // Tema Azul (Inverno/Gelado)
-});
 
 const activeStyle = 'background: #c62828; color: white; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s;';
 const inactiveStyle = 'background: #e0e0e0; color: #333; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s;';
