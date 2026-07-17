@@ -62,6 +62,10 @@ const props = defineProps({
   usuarioAtual: {
     type: String,
     default: ''
+  },
+  filtroInicial: {
+    type: String,
+    default: ''
   }
 });
 
@@ -70,7 +74,7 @@ const apiUrl = 'https://natal-bl3x.onrender.com/api/presentes';
 
 const nomesFamilia = computed(() => props.participants.map(p => p.name));
 
-const filtroFamiliar = ref('');
+const filtroFamiliar = ref(props.filtroInicial);
 
 const nomesFiltrados = computed(() => {
   if (filtroFamiliar.value) return [filtroFamiliar.value];

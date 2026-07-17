@@ -79,7 +79,9 @@
           <h2>Você tirou:</h2>
           <h1 style="color: #E53935; font-size: 3.5rem; margin: 20px 0; background: #ffebee; padding: 20px; border-radius: 10px; border: 2px dashed #E53935;">{{ revealedName }}</h1>
           <p style="font-size: 1.3rem; font-weight: bold; color: #d32f2f;">📸 Tire um PRINT desta tela para não esquecer!</p>
-          <button @click="resetView" style="margin-top: 30px; padding: 12px; font-size: 16px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Sair e Ocultar</button>
+          
+          <button @click="irParaPresentes(revealedName)" style="margin-top: 20px; padding: 12px; font-size: 16px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">🎁 Ver a lista de presentes de {{ revealedName }}</button>
+          <button @click="resetView" style="margin-top: 10px; padding: 12px; font-size: 16px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Sair e Ocultar</button>
         </div>
 
         <div v-if="!revealedName && !isAdmin" style="margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px;">
@@ -97,7 +99,7 @@
 
       <!-- ABA 3: PRESENTES -->
       <div v-if="activeTab === 'presentes'">
-        <Presentes :participants="participants" :usuario-atual="nomeSalvo" />
+        <Presentes :participants="participants" :usuario-atual="nomeSalvo" :filtro-inicial="filtroPresentesInicial" />
       </div>
 
     </div>
@@ -123,6 +125,12 @@ const isAdmin = ref(false);
 const adminNamesList = ref('');
 const nomeSalvo = ref('');
 const nomeSelecionadoGlobally = ref('');
+const filtroPresentesInicial = ref('');
+
+const irParaPresentes = (nome) => {
+  filtroPresentesInicial.value = nome;
+  activeTab.value = 'presentes';
+};
 
 const salvarNomeGlobal = () => {
   if (nomeSelecionadoGlobally.value) {
