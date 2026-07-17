@@ -5,27 +5,34 @@
     <h2 style="color: #33691e; margin-top: 0;">🍽️ Cardápio da Ceia</h2>
     <p style="color: #558b2f; margin-bottom: 20px; font-size: 1.1rem;">Escolha o que você vai levar para a nossa ceia!</p>
 
-    <div v-for="prato in pratos" :key="prato._id" style="background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: relative;">
-      <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 10px;">
-        <button @click="editarPrato(prato)" style="background: transparent; border: none; color: #1976d2; cursor: pointer; font-size: 1rem;" title="Editar Prato">✏️</button>
-        <button @click="deletarPrato(prato._id)" style="background: transparent; border: none; color: #f44336; cursor: pointer; font-size: 1.1rem;" title="Remover Prato">✖</button>
+    <div v-for="prato in pratos" :key="prato._id" style="background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px;">
+      
+      <!-- Linha Superior: Nome, Categoria e Controles -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+        <div style="text-align: left;">
+          <strong style="font-size: 1.2rem; color: #2e7d32;">{{ prato.nomePrato }}</strong>
+          <span style="display: block; font-size: 0.85rem; color: #757575; text-transform: uppercase; margin-top: 3px;">{{ prato.categoria }}</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button @click="editarPrato(prato)" style="background: #e3f2fd; border: 1px solid #bbdefb; color: #1976d2; cursor: pointer; font-size: 1rem; border-radius: 5px; padding: 4px 8px;" title="Editar Prato">✏️</button>
+          <button @click="deletarPrato(prato._id)" style="background: #ffebee; border: 1px solid #ffcdd2; color: #f44336; cursor: pointer; font-size: 1rem; border-radius: 5px; padding: 4px 8px;" title="Remover Prato">✖</button>
+        </div>
       </div>
 
-      <div style="text-align: left; margin-top: 10px; flex-grow: 1;">
-        <strong style="font-size: 1.2rem; color: #2e7d32;">{{ prato.nomePrato }}</strong>
-        <span style="display: block; font-size: 0.85rem; color: #757575; text-transform: uppercase; margin-top: 3px;">{{ prato.categoria }}</span>
-      </div>
-      <div v-if="prato.responsavel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-        <span style="background: #e8f5e9; color: #2e7d32; padding: 8px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; border: 1px solid #c8e6c9;">
-          ✅ {{ prato.responsavel }} vai levar
-        </span>
-        <button @click="desistirPrato(prato._id, prato.nomePrato)" style="background: transparent; border: 1px solid #f44336; color: #f44336; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; cursor: pointer;">
-          Desistir
+      <!-- Linha Inferior: Botão Eu Levo ou Responsável + Desistir -->
+      <div style="display: flex; align-items: center; justify-content: flex-end; width: 100%; border-top: 1px dashed #eee; padding-top: 10px;">
+        <div v-if="prato.responsavel" style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px; flex-wrap: wrap;">
+          <span style="background: #e8f5e9; color: #2e7d32; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; border: 1px solid #c8e6c9;">
+            ✅ {{ prato.responsavel }} vai levar
+          </span>
+          <button @click="desistirPrato(prato._id, prato.nomePrato)" style="background: transparent; border: 1px solid #f44336; color: #f44336; padding: 6px 12px; border-radius: 5px; font-size: 0.85rem; font-weight: bold; cursor: pointer; white-space: nowrap;">
+            Desistir
+          </button>
+        </div>
+        <button v-else @click="assumirPrato(prato._id, prato.nomePrato)" style="background: #ff9800; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%;">
+          🙋 Eu levo!
         </button>
       </div>
-      <button v-else @click="assumirPrato(prato._id, prato.nomePrato)" style="background: #ff9800; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;">
-        🙋 Eu levo!
-      </button>
     </div>
 
     <div v-if="pratos.length === 0" style="color: #999; margin: 20px 0;">O cardápio ainda está vazio.</div>
@@ -37,12 +44,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import Swal from 'sweetalert2';
+
+const props = defineProps({
+  participants: {
+    type: Array,
+    default: () => []
+  }
+});
 
 const pratos = ref([]);
 const apiUrl = 'https://natal-bl3x.onrender.com/api/ceia';
-const nomesFamilia = ['Danilo', 'Fernanda', 'Guilherme', 'Daniel', 'Ana Lúcia', 'Liviane', 'Patrícia', 'Maria', 'Simão'];
+
+const nomesFamilia = computed(() => props.participants.map(p => p.name));
 
 const fetchPratos = async () => {
   try {
@@ -61,7 +76,7 @@ const assumirPrato = async (id, nomePrato) => {
         <p style="margin-bottom: 10px; color: #333;">Quem vai levar: <b>${nomePrato}</b>?</p>
         <select id="swal-responsavel" class="swal2-select" style="width: 100%; max-width: 100%; margin: 0;">
           <option value="" disabled selected>Selecione seu nome...</option>
-          ${nomesFamilia.map(n => `<option value="${n}">${n}</option>`).join('')}
+          ${nomesFamilia.value.map(n => `<option value="${n}">${n}</option>`).join('')}
         </select>
       </div>
     `,

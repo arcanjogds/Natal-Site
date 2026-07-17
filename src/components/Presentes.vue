@@ -44,11 +44,17 @@
 import { ref, computed, onMounted } from 'vue';
 import Swal from 'sweetalert2';
 
+const props = defineProps({
+  participants: {
+    type: Array,
+    default: () => []
+  }
+});
+
 const presentes = ref([]);
 const apiUrl = 'https://natal-bl3x.onrender.com/api/presentes';
 
-// LISTA FIXA DA FAMÍLIA
-const nomesFamilia = ['Danilo', 'Fernanda', 'Guilherme', 'Daniel', 'Ana Lúcia', 'Liviane', 'Patrícia', 'Maria', 'Simão'];
+const nomesFamilia = computed(() => props.participants.map(p => p.name));
 
 const getPresentes = (nome) => {
   return presentes.value.filter(p => p.nomeFamiliar === nome);
@@ -71,7 +77,7 @@ const adicionarPresente = async () => {
         <label style="font-weight: bold; font-size: 14px; color: #333;">Seu Nome:</label>
         <select id="swal-nome" class="swal2-select" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0;">
           <option value="" disabled selected>Escolha seu nome...</option>
-          ${nomesFamilia.map(n => `<option value="${n}">${n}</option>`).join('')}
+          ${nomesFamilia.value.map(n => `<option value="${n}">${n}</option>`).join('')}
         </select>
 
         <label style="font-weight: bold; font-size: 14px; color: #333;">O que você quer?</label>

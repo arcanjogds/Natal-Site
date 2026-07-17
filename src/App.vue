@@ -36,7 +36,7 @@
         </div>
 
         <div v-if="savedLocally && !revealedName && !isAdmin" style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9; margin-top: 20px;">
-          <p style="font-size: 1.2rem; color: #1565c0; font-weight: bold;">Você já tirou seu amigo secreto neste aparelho!</p>
+          <p style="font-size: 1.2rem; color: #1565c0; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto neste aparelho!</p>
           <button @click="showSavedResult" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #1976D2; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
         </div>
 
@@ -68,12 +68,12 @@
 
       <!-- ABA 2: CEIA -->
       <div v-if="activeTab === 'ceia'">
-        <Ceia />
+        <Ceia :participants="participants" />
       </div>
 
       <!-- ABA 3: PRESENTES -->
       <div v-if="activeTab === 'presentes'">
-        <Presentes />
+        <Presentes :participants="participants" />
       </div>
 
       <div v-if="activeTab === 'sorteio'" style="margin-top: 60px; font-size: 12px; color: #aaa;">
@@ -101,6 +101,7 @@ const revealedName = ref('');
 const savedLocally = ref(false);
 const isAdmin = ref(false);
 const adminNamesList = ref('');
+const nomeSalvo = ref('');
 
 const fetchParticipants = async () => {
   try {
@@ -113,7 +114,10 @@ const fetchParticipants = async () => {
 
 onMounted(() => {
   fetchParticipants();
-  if (localStorage.getItem('meuAmigoSecreto')) savedLocally.value = true;
+  if (localStorage.getItem('meuAmigoSecreto')) {
+    savedLocally.value = true;
+    nomeSalvo.value = localStorage.getItem('meuNome');
+  }
 });
 
 const revealSecretSanta = async () => {
