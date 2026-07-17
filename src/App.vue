@@ -98,8 +98,6 @@
         <Presentes :participants="participants" :usuario-atual="nomeSalvo" />
       </div>
 
-      </div>
-
     </div>
   </div>
 </template>
