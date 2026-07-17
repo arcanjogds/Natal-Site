@@ -3,7 +3,24 @@
     <h2 style="color: #33691e; margin-top: 0;">🍽️ Cardápio da Ceia</h2>
     <p style="color: #558b2f; margin-bottom: 20px; font-size: 1.1rem;">Escolha o que você vai levar para a nossa ceia!</p>
 
-    <div v-for="prato in pratos" :key="prato._id" style="background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px;">
+    <!-- ÁREA DE FILTROS -->
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+      <select v-model="filtroCategoria" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; background: white;">
+        <option value="Todas">Todas as Categorias</option>
+        <option value="Principal">Principal</option>
+        <option value="Acompanhamento">Acompanhamento</option>
+        <option value="Sobremesa">Sobremesa</option>
+        <option value="Bebida">Bebida</option>
+      </select>
+
+      <select v-model="filtroResponsavel" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; background: white;">
+        <option value="Todos">Todas as Pessoas</option>
+        <option value="Sem Ninguém">❌ Sem ninguém (Livres)</option>
+        <option v-for="nome in nomesFamilia" :key="nome" :value="nome">🙋 {{ nome }}</option>
+      </select>
+    </div>
+
+    <div v-for="prato in pratosFiltrados" :key="prato._id" style="background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px;">
       
       <!-- Linha Superior: Nome, Categoria e Controles -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
@@ -33,7 +50,7 @@
       </div>
     </div>
 
-    <div v-if="pratos.length === 0" style="color: #999; margin: 20px 0;">O cardápio ainda está vazio.</div>
+    <div v-if="pratosFiltrados.length === 0" style="color: #999; margin: 20px 0;">O cardápio ainda está vazio ou nenhum prato corresponde ao filtro.</div>
 
     <!-- BOTAO FLUTUANTE (FAB) -->
     <div class="fab-container">
@@ -64,6 +81,23 @@ const pratos = ref([]);
 const apiUrl = 'https://natal-bl3x.onrender.com/api/ceia';
 
 const nomesFamilia = computed(() => props.participants.map(p => p.name));
+
+const filtroCategoria = ref('Todas');
+const filtroResponsavel = ref('Todos');
+
+const pratosFiltrados = computed(() => {
+  return pratos.value.filter(prato => {
+    if (filtroCategoria.value !== 'Todas' && prato.categoria !== filtroCategoria.value) {
+      return false;
+    }
+    if (filtroResponsavel.value === 'Sem Ninguém') {
+      if (prato.responsavel !== '') return false;
+    } else if (filtroResponsavel.value !== 'Todos') {
+      if (prato.responsavel !== filtroResponsavel.value) return false;
+    }
+    return true;
+  });
+});
 
 const fetchPratos = async () => {
   try {
