@@ -1,13 +1,21 @@
 <template>
   <div class="container" style="text-align: center; font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto;">
-    <h1>🎄 Amigo Secreto Natal 2026 🎄</h1>
+    <h1>🎄 Amigo Secreto da Galera 🎄</h1>
     
+    <!-- MURAL DE REGRAS (NOVO) -->
+    <div style="background: #fff3e0; padding: 15px; border-radius: 8px; border: 2px dashed #ff9800; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h3 style="color: #e65100; margin: 0 0 10px 0;">📜 Regra do Sorteio</h3>
+      <p style="margin: 0; font-size: 1.2rem; color: #d84315; font-weight: bold;">
+        🎁 Valor do presente: Mínimo de R$ 150,00
+      </p>
+    </div>
+
     <!-- Tela 1: Já tem um sorteio salvo -->
     <div v-if="savedLocally && !revealedName" style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9; margin-top: 20px;">
       <p style="font-size: 1.2rem; color: #1565c0; font-weight: bold;">Você já tirou seu amigo secreto neste aparelho!</p>
       <button 
         @click="showSavedResult" 
-        style="margin-top: 10px; padding: 15px 20px; font-size: 16px; cursor: pointer; background: #1976D2; color: white; border: none; border-radius: 8px; width: 100%;"
+        style="margin-top: 10px; padding: 15px 20px; font-size: 16px; cursor: pointer; background: #1976D2; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold;"
       >
         👀 Ver meu resultado novamente
       </button>
@@ -64,7 +72,6 @@
         </span>
       </div>
 
-      <!-- Mensagem de sucesso quando todos finalizam -->
       <p v-if="participants.length > 0 && participants.filter(p => !p.hasSeen).length === 0" style="color: #4CAF50; font-weight: bold; font-size: 1.3rem; margin-top: 20px;">
         Todo mundo já tirou! 🎉
       </p>
@@ -74,6 +81,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import Swal from 'sweetalert2'; // Importando a biblioteca de pop-ups maravilhosos!
 
 const participants = ref([]);
 const selectedName = ref('');
@@ -97,7 +105,19 @@ onMounted(() => {
 });
 
 const revealSecretSanta = async () => {
-  if (!confirm(`Você confirma que é ${selectedName.value}? Só é possível ver na lista uma vez!`)) return;
+  // POP-UP ANIMADO DE CONFIRMAÇÃO
+  const result = await Swal.fire({
+    title: 'É você mesmo?',
+    html: `Você confirma que é <b>${selectedName.value}</b>?<br><br><small style="color: #d33;">Atenção: Só é possível sortear uma vez!</small>`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#4CAF50',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sim, sou eu!',
+    cancelButtonText: 'Não, errei o nome'
+  });
+
+  if (!result.isConfirmed) return;
 
   try {
     const res = await fetch('https://natal-bl3x.onrender.com/api/reveal', {
@@ -113,21 +133,35 @@ const revealSecretSanta = async () => {
     localStorage.setItem('meuAmigoSecreto', data.drawnName);
     savedLocally.value = true;
     
+    // POP-UP ANIMADO COBRANDO O PRINT
     setTimeout(() => {
-      alert("📸 ATENÇÃO: Tire um PRINT da tela agora para não esquecer quem você tirou!");
-    }, 300);
+      Swal.fire({
+        title: '📸 Hora do Print!',
+        text: 'Tire um PRINT da tela agora para não esquecer quem você tirou!',
+        icon: 'warning',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Entendido!'
+      });
+    }, 500);
 
     await fetchParticipants();
   } catch (error) {
     console.error("Erro ao revelar:", error);
-    alert("Erro ao conectar com o servidor.");
+    Swal.fire('Erro!', 'Problema ao conectar com o servidor.', 'error');
   }
 };
 
 const showSavedResult = () => {
   revealedName.value = localStorage.getItem('meuAmigoSecreto');
+  
   setTimeout(() => {
-    alert("📸 Lembrete: Tire um PRINT da tela para não esquecer!");
+    Swal.fire({
+      title: 'Lembrete!',
+      text: 'Não esqueça de tirar o PRINT desta tela!',
+      icon: 'info',
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Ok'
+    });
   }, 300);
 };
 
