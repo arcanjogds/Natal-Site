@@ -55,6 +55,10 @@ const props = defineProps({
   participants: {
     type: Array,
     default: () => []
+  },
+  usuarioAtual: {
+    type: String,
+    default: ''
   }
 });
 
@@ -71,35 +75,28 @@ const fetchPratos = async () => {
 };
 onMounted(() => fetchPratos());
 
-// FORMULÁRIO PARA ASSUMIR UM PRATO (Com a lista predefinida)
+// FORMULÁRIO PARA ASSUMIR UM PRATO
 const assumirPrato = async (id, nomePrato) => {
-  const { value: nome } = await Swal.fire({
+  if (!props.usuarioAtual) {
+    Swal.fire('Identifique-se!', 'Por favor, selecione quem é você no canto superior direito da página antes de assumir um prato.', 'warning');
+    return;
+  }
+
+  const confirm = await Swal.fire({
     title: 'Confirmar Responsabilidade',
-    html: `
-      <div style="text-align: left;">
-        <p style="margin-bottom: 10px; color: #333;">Quem vai levar: <b>${nomePrato}</b>?</p>
-        <select id="swal-responsavel" class="swal2-select" style="width: 100%; max-width: 100%; margin: 0;">
-          <option value="" disabled selected>Selecione seu nome...</option>
-          ${nomesFamilia.value.map(n => `<option value="${n}">${n}</option>`).join('')}
-        </select>
-      </div>
-    `,
-    focusConfirm: false,
+    text: `Você (${props.usuarioAtual}) vai levar: ${nomePrato}?`,
+    icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#ff9800',
     cancelButtonColor: '#d33',
-    confirmButtonText: 'Confirmar!',
-    preConfirm: () => {
-      const val = document.getElementById('swal-responsavel').value;
-      if (!val) Swal.showValidationMessage('Você precisa selecionar o seu nome!');
-      return val;
-    }
+    confirmButtonText: 'Sim, eu levo!',
+    cancelButtonText: 'Cancelar'
   });
 
-  if (nome) {
+  if (confirm.isConfirmed) {
     try {
-      await fetch(`${apiUrl}/${id}/assumir`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ responsavel: nome }) });
-      Swal.fire('Aí sim!', `${nomePrato} está garantido por ${nome}!`, 'success');
+      await fetch(`${apiUrl}/${id}/assumir`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ responsavel: props.usuarioAtual }) });
+      Swal.fire('Aí sim!', `${nomePrato} está garantido por ${props.usuarioAtual}!`, 'success');
       fetchPratos();
     } catch (error) { Swal.fire('Erro', 'Não foi possível salvar.', 'error'); }
   }

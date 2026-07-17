@@ -2,7 +2,19 @@
   <div style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem;">
     
     <!-- CAIXA PRINCIPAL DO SITE -->
-    <div style="background: white; text-align: center; font-family: sans-serif; padding: 2rem; width: 100%; max-width: 800px; margin: auto; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); box-sizing: border-box;">
+    <div style="background: white; text-align: center; font-family: sans-serif; padding: 2rem; width: 100%; max-width: 800px; margin: auto; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative;">
+      
+      <!-- IDENTIFICAÇÃO DO USUÁRIO (Canto Superior Direito) -->
+      <div style="position: absolute; top: 15px; right: 20px;">
+        <select v-if="!nomeSalvo" v-model="nomeSelecionadoGlobally" @change="salvarNomeGlobal" style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.9rem; background: #f0f0f0;">
+          <option value="" disabled selected>👤 Entrar como...</option>
+          <option v-for="p in participants" :key="p.name" :value="p.name">{{ p.name }}</option>
+        </select>
+        <div v-else style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.9rem; font-weight: bold; color: #1565c0;">👤 {{ nomeSalvo }}</span>
+          <button @click="trocarUsuario" style="background: transparent; border: none; font-size: 0.8rem; color: #f44336; cursor: pointer; text-decoration: underline; padding: 0;">Sair</button>
+        </div>
+      </div>
       
       <!-- TÍTULO -->
       <h1 style="color: #c62828; font-size: 2.2rem; margin-bottom: 20px;">🎅 Natal 2026 🎄</h1>
@@ -41,14 +53,16 @@
         </div>
 
         <div v-if="!revealedName && !savedLocally && !isAdmin">
-          <p style="font-size: 1.2rem; color: #555;">Selecione o seu nome na lista abaixo:</p>
-          <select v-model="selectedName" style="padding: 12px; font-size: 16px; margin-bottom: 20px; width: 100%; border-radius: 8px; border: 1px solid #ccc;">
+          <p v-if="!nomeSalvo" style="font-size: 1.2rem; color: #555;">Selecione o seu nome na lista abaixo:</p>
+          <select v-if="!nomeSalvo" v-model="selectedName" style="padding: 12px; font-size: 16px; margin-bottom: 20px; width: 100%; border-radius: 8px; border: 1px solid #ccc;">
             <option disabled value="">Escolha seu nome...</option>
             <option v-for="p in participants" :key="p.name" :value="p.name" :disabled="p.hasSeen">
               {{ p.name }} {{ p.hasSeen ? '(Já viu o resultado)' : '' }}
             </option>
           </select>
-          <button @click="revealSecretSanta" :disabled="!selectedName" style="padding: 15px; font-size: 18px; cursor: pointer; background: #4CAF50; font-weight: bold; color: white; border: none; border-radius: 8px; width: 100%;">Revelar meu Amigo Secreto</button>
+          <p v-else style="font-size: 1.2rem; color: #555;">Você está participando como <b>{{ nomeSalvo }}</b>.</p>
+          
+          <button @click="revealSecretSanta" :disabled="!nomeSalvo && !selectedName" style="padding: 15px; font-size: 18px; cursor: pointer; background: #4CAF50; font-weight: bold; color: white; border: none; border-radius: 8px; width: 100%;">Revelar meu Amigo Secreto</button>
         </div>
 
         <div v-if="revealedName && !isAdmin">
@@ -68,12 +82,12 @@
 
       <!-- ABA 2: CEIA -->
       <div v-if="activeTab === 'ceia'">
-        <Ceia :participants="participants" />
+        <Ceia :participants="participants" :usuario-atual="nomeSalvo" />
       </div>
 
       <!-- ABA 3: PRESENTES -->
       <div v-if="activeTab === 'presentes'">
-        <Presentes :participants="participants" />
+        <Presentes :participants="participants" :usuario-atual="nomeSalvo" />
       </div>
 
       <div v-if="activeTab === 'sorteio'" style="margin-top: 60px; font-size: 12px; color: #aaa;">
@@ -102,6 +116,21 @@ const savedLocally = ref(false);
 const isAdmin = ref(false);
 const adminNamesList = ref('');
 const nomeSalvo = ref('');
+const nomeSelecionadoGlobally = ref('');
+
+const salvarNomeGlobal = () => {
+  if (nomeSelecionadoGlobally.value) {
+    localStorage.setItem('meuNome', nomeSelecionadoGlobally.value);
+    nomeSalvo.value = nomeSelecionadoGlobally.value;
+  }
+};
+
+const trocarUsuario = () => {
+  localStorage.removeItem('meuNome');
+  nomeSalvo.value = '';
+  nomeSelecionadoGlobally.value = '';
+  selectedName.value = '';
+};
 
 const fetchParticipants = async () => {
   try {
@@ -121,9 +150,10 @@ onMounted(() => {
 });
 
 const revealSecretSanta = async () => {
+  const nameToUse = nomeSalvo.value || selectedName.value;
   const result = await Swal.fire({
     title: 'É você mesmo?',
-    html: `Você confirma que é <b>${selectedName.value}</b>?<br><br><small style="color: #d33;">Atenção: Só é possível sortear uma vez!</small>`,
+    html: `Você confirma que é <b>${nameToUse}</b>?<br><br><small style="color: #d33;">Atenção: Só é possível sortear uma vez!</small>`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#4CAF50',
@@ -138,11 +168,12 @@ const revealSecretSanta = async () => {
     const res = await fetch('https://natal-bl3x.onrender.com/api/reveal', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: selectedName.value })
+      body: JSON.stringify({ name: nameToUse })
     });
     const data = await res.json();
     revealedName.value = data.drawnName;
-    localStorage.setItem('meuNome', selectedName.value);
+    localStorage.setItem('meuNome', nameToUse);
+    nomeSalvo.value = nameToUse;
     localStorage.setItem('meuAmigoSecreto', data.drawnName);
     savedLocally.value = true;
     setTimeout(() => { Swal.fire({ title: '📸 Hora do Print!', text: 'Tire um PRINT da tela agora!', icon: 'warning', confirmButtonColor: '#3085d6' }); }, 500);

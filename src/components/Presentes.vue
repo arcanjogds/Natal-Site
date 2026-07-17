@@ -14,8 +14,8 @@
     </div>
 
     <!-- GRID DE CARDS POR PESSOA -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; text-align: left;">
-      <div v-for="nome in nomesFiltrados" :key="nome" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #bbdefb; display: flex; flex-direction: column;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; text-align: left;">
+      <div v-for="nome in nomesFiltrados" :key="nome" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #bbdefb; display: flex; flex-direction: column; width: 100%; max-width: 350px; flex-grow: 1;">
         
         <!-- HEADER DO CARD (NOME) -->
         <div style="background: #2196f3; padding: 15px; color: white; display: flex; justify-content: center; align-items: center;">
@@ -60,6 +60,10 @@ const props = defineProps({
   participants: {
     type: Array,
     default: () => []
+  },
+  usuarioAtual: {
+    type: String,
+    default: ''
   }
 });
 
@@ -87,18 +91,17 @@ const fetchPresentes = async () => {
 };
 onMounted(() => fetchPresentes());
 
-// FORMULÁRIO ARRUMADO COM LISTA DE NOMES E LABELS PARA NÃO CORTAR TEXTO
+// FORMULÁRIO ARRUMADO SEM PRECISAR ESCOLHER NOME
 const adicionarPresente = async () => {
+  if (!props.usuarioAtual) {
+    Swal.fire('Identifique-se!', 'Por favor, selecione quem é você no canto superior direito da página antes de adicionar um pedido.', 'warning');
+    return;
+  }
+
   const { value: formValues } = await Swal.fire({
     title: 'Sua lista de desejos',
     html: `
       <div style="text-align: left;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Seu Nome:</label>
-        <select id="swal-nome" class="swal2-select" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0;">
-          <option value="" disabled selected>Escolha seu nome...</option>
-          ${nomesFamilia.value.map(n => `<option value="${n}">${n}</option>`).join('')}
-        </select>
-
         <label style="font-weight: bold; font-size: 14px; color: #333;">O que você quer?</label>
         <input id="swal-item" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" placeholder="Ex: Perfume Boticário">
 
@@ -115,13 +118,13 @@ const adicionarPresente = async () => {
     confirmButtonText: 'Salvar Pedido',
     cancelButtonText: 'Cancelar',
     preConfirm: () => {
-      const nomeFamiliar = document.getElementById('swal-nome').value;
+      const nomeFamiliar = props.usuarioAtual;
       const item = document.getElementById('swal-item').value;
       const tamanhoEspecificacao = document.getElementById('swal-espec').value;
       let linkLoja = document.getElementById('swal-link').value;
       
-      if (!nomeFamiliar || !item) {
-        Swal.showValidationMessage('Seu nome e o item são obrigatórios!');
+      if (!item) {
+        Swal.showValidationMessage('O item é obrigatório!');
         return false;
       }
       if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
