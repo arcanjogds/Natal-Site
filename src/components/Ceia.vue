@@ -1,7 +1,5 @@
 <template>
   <div style="background: #f1f8e9; padding: 20px; border-radius: 8px; border: 2px solid #8bc34a; margin-top: 20px; text-align: center;">
-    <img src="/img/ceia.jpg" alt="Ceia de Natal" style="width: 100%; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); object-fit: cover; max-height: 200px;">
-    
     <h2 style="color: #33691e; margin-top: 0;">🍽️ Cardápio da Ceia</h2>
     <p style="color: #558b2f; margin-bottom: 20px; font-size: 1.1rem;">Escolha o que você vai levar para a nossa ceia!</p>
 

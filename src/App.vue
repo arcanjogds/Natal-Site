@@ -1,18 +1,35 @@
 <template>
-  <div style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem;">
-    
+  <!-- TELA DE LOGIN -->
+  <div v-if="!nomeSalvo && !isAdmin" style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 3rem 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 400px; position: relative;">
+      
+      <button @click="openAdmin" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; font-size: 1.2rem; cursor: pointer;" title="Acesso Admin">🔒</button>
+
+      <h1 style="color: #c62828; font-size: 2.2rem; margin-top: 0;">🎅 Natal 2026 🎄</h1>
+      <p style="color: #555; margin-bottom: 2rem; font-size: 1.1rem;">Selecione seu nome para entrar</p>
+      
+      <select v-model="nomeSelecionadoGlobally" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1.5rem;">
+        <option value="" disabled selected>👤 Quem é você?</option>
+        <option v-for="p in participants" :key="p.name" :value="p.name">{{ p.name }}</option>
+      </select>
+      
+      <button @click="salvarNomeGlobal" :disabled="!nomeSelecionadoGlobally" style="width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s;" :style="nomeSelecionadoGlobally ? '' : 'opacity: 0.5; cursor: not-allowed;'">
+        Entrar
+      </button>
+    </div>
+  </div>
+
+  <!-- SITE PRINCIPAL -->
+  <div v-else style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem;">
     <!-- CAIXA PRINCIPAL DO SITE -->
     <div style="background: white; text-align: center; font-family: sans-serif; padding: 2rem; width: 100%; max-width: 800px; margin: auto; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative;">
       
       <!-- IDENTIFICAÇÃO DO USUÁRIO (Canto Superior Direito) -->
       <div style="position: absolute; top: 15px; right: 20px;">
-        <select v-if="!nomeSalvo" v-model="nomeSelecionadoGlobally" @change="salvarNomeGlobal" style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.9rem; background: #f0f0f0;">
-          <option value="" disabled selected>👤 Entrar como...</option>
-          <option v-for="p in participants" :key="p.name" :value="p.name">{{ p.name }}</option>
-        </select>
-        <div v-else style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 0.9rem; font-weight: bold; color: #1565c0;">👤 {{ nomeSalvo }}</span>
-          <button @click="trocarUsuario" style="background: transparent; border: none; font-size: 0.8rem; color: #f44336; cursor: pointer; text-decoration: underline; padding: 0;">Sair</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.9rem; font-weight: bold; color: #1565c0;" v-if="nomeSalvo">👤 {{ nomeSalvo }}</span>
+          <button @click="trocarUsuario" style="background: transparent; border: none; font-size: 0.8rem; color: #f44336; cursor: pointer; text-decoration: underline; padding: 0;" v-if="nomeSalvo">Sair</button>
+          <button @click="openAdmin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 0;" title="Acesso Admin">🔒</button>
         </div>
       </div>
       
@@ -30,7 +47,6 @@
       <!-- ABA 1: SORTEIO DO AMIGO SECRETO -->
       <!-- ========================================== -->
       <div v-if="activeTab === 'sorteio'">
-        <img src="/img/sorteio.jpg" alt="Amigo Secreto" style="width: 100%; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); object-fit: cover; max-height: 250px;">
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; border: 2px dashed #ff9800; margin-bottom: 25px; text-align: left;">
           <h3 style="color: #e65100; margin: 0 0 10px 0; text-align: center;">📜 Regra do Jogo</h3>
@@ -53,16 +69,8 @@
         </div>
 
         <div v-if="!revealedName && !savedLocally && !isAdmin">
-          <p v-if="!nomeSalvo" style="font-size: 1.2rem; color: #555;">Selecione o seu nome na lista abaixo:</p>
-          <select v-if="!nomeSalvo" v-model="selectedName" style="padding: 12px; font-size: 16px; margin-bottom: 20px; width: 100%; border-radius: 8px; border: 1px solid #ccc;">
-            <option disabled value="">Escolha seu nome...</option>
-            <option v-for="p in participants" :key="p.name" :value="p.name" :disabled="p.hasSeen">
-              {{ p.name }} {{ p.hasSeen ? '(Já viu o resultado)' : '' }}
-            </option>
-          </select>
-          <p v-else style="font-size: 1.2rem; color: #555;">Você está participando como <b>{{ nomeSalvo }}</b>.</p>
-          
-          <button @click="revealSecretSanta" :disabled="!nomeSalvo && !selectedName" style="padding: 15px; font-size: 18px; cursor: pointer; background: #4CAF50; font-weight: bold; color: white; border: none; border-radius: 8px; width: 100%;">Revelar meu Amigo Secreto</button>
+          <p style="font-size: 1.2rem; color: #555;">Você está participando como <b>{{ nomeSalvo }}</b>.</p>
+          <button @click="revealSecretSanta" style="padding: 15px; font-size: 18px; cursor: pointer; background: #4CAF50; font-weight: bold; color: white; border: none; border-radius: 8px; width: 100%;">Revelar meu Amigo Secreto</button>
         </div>
 
         <div v-if="revealedName && !isAdmin">
@@ -90,8 +98,6 @@
         <Presentes :participants="participants" :usuario-atual="nomeSalvo" />
       </div>
 
-      <div v-if="activeTab === 'sorteio'" style="margin-top: 60px; font-size: 12px; color: #aaa;">
-        <span @click="openAdmin" style="cursor: pointer; opacity: 0.5;">🔒</span>
       </div>
 
     </div>

@@ -1,7 +1,5 @@
 <template>
   <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 2px solid #2196f3; margin-top: 20px; text-align: center;">
-    <img src="/img/presentes.jpg" alt="Presentes" style="width: 100%; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); object-fit: cover; max-height: 200px;">
-    
     <h2 style="color: #0d47a1; margin-top: 0;">🛍️ Vitrine de Presentes</h2>
     <p style="color: #1565c0; margin-bottom: 20px; font-size: 1.1rem;">Dicas do que a família quer ganhar!</p>
 
@@ -13,9 +11,9 @@
       </select>
     </div>
 
-    <!-- GRID DE CARDS POR PESSOA -->
-    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; text-align: left;">
-      <div v-for="nome in nomesFiltrados" :key="nome" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #bbdefb; display: flex; flex-direction: column; width: 100%; max-width: 350px; flex-grow: 1;">
+    <!-- LISTA DE CARDS POR PESSOA -->
+    <div style="display: flex; flex-direction: column; gap: 20px; text-align: left;">
+      <div v-for="nome in nomesFiltrados" :key="nome" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #bbdefb; display: flex; flex-direction: column; width: 100%;">
         
         <!-- HEADER DO CARD (NOME) -->
         <div style="background: #2196f3; padding: 15px; color: white; display: flex; justify-content: center; align-items: center;">
@@ -27,8 +25,8 @@
           <div v-if="getPresentes(nome).length === 0" style="color: #999; font-size: 0.9rem; font-style: italic; text-align: center; margin-top: 10px;">
             Ainda não pediu nada.
           </div>
-          <ul style="list-style: none; padding: 0; margin: 0;">
-            <li v-for="presente in getPresentes(nome)" :key="presente._id" style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 10px; position: relative;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+            <div v-for="presente in getPresentes(nome)" :key="presente._id" style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e0e0e0; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
               <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 8px;">
                 <button @click="editarPresente(presente)" style="background: transparent; border: none; color: #1976d2; cursor: pointer; font-size: 1rem;" title="Editar pedido">✏️</button>
                 <button @click="deletarPresente(presente._id)" style="background: transparent; border: none; color: #f44336; cursor: pointer; font-size: 1.1rem;" title="Remover pedido">✖</button>
@@ -36,8 +34,8 @@
               <p style="margin: 0; font-weight: bold; color: #333; padding-right: 45px;">{{ presente.item }}</p>
               <p v-if="presente.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">📝 {{ presente.tamanhoEspecificacao }}</p>
               <a v-if="presente.linkLoja" :href="presente.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #1976d2; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #1976d2;">🛒 Ver na Loja</a>
-            </li>
-          </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
