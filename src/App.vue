@@ -1,15 +1,45 @@
 <template>
-  <div style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem;">
+  <!-- TELA DE LOGIN INICIAL -->
+  <div v-if="!nomeSalvo && !isAdmin" style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 3rem 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 400px; position: relative;">
+      
+      <button @click="openAdmin" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; font-size: 1.2rem; cursor: pointer;" title="Acesso Admin">🔒</button>
+
+      <h1 style="color: #c62828; font-size: 2.2rem; margin-top: 0;">🎅 Natal 2026 🎄</h1>
+      <p style="color: #555; margin-bottom: 2rem; font-size: 1.1rem;">Selecione seu nome para entrar</p>
+      
+      <select v-model="nomeSelecionadoGlobally" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1.5rem;">
+        <option value="" disabled selected>👤 Quem é você?</option>
+        <option v-for="p in participants" :key="p.name" :value="p.name">
+          {{ p.name }}
+        </option>
+      </select>
+      
+      <button @click="salvarNomeGlobal" :disabled="!nomeSelecionadoGlobally" style="width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s;" :style="nomeSelecionadoGlobally ? '' : 'opacity: 0.5; cursor: not-allowed;'">
+        Entrar
+      </button>
+    </div>
+  </div>
+
+  <!-- TELA DO ADMINISTRADOR (Isolada) -->
+  <div v-else-if="isAdmin" style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 3rem 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 500px;">
+        <h3 style="color: #263238; margin-top: 0; font-size: 1.5rem;">⚙️ Painel do Administrador</h3>
+        <p style="font-size: 14px; color: #546e7a;">Edite a lista abaixo e clique no botão para apagar e gerar novo sorteio.</p>
+        <textarea v-model="adminNamesList" rows="12" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem;"></textarea>
+        <button @click="regerarSorteio" style="margin-top: 15px; padding: 12px; background: #E53935; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1.1rem;">🔄 Refazer Sorteio Oficial</button>
+        <button @click="isAdmin = false" style="margin-top: 10px; padding: 10px; background: #90a4ae; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1rem;">Sair do Painel</button>
+    </div>
+  </div>
+
+  <!-- SITE PRINCIPAL -->
+  <div v-else style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem;">
     <!-- CAIXA PRINCIPAL DO SITE -->
     <div style="background: white; text-align: center; font-family: sans-serif; padding: 2rem; width: 100%; max-width: 800px; margin: auto; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative;">
       
       <!-- IDENTIFICAÇÃO DO USUÁRIO (Canto Superior Direito) -->
       <div style="position: absolute; top: 15px; right: 20px;">
-        <select v-if="!nomeSalvo" v-model="nomeSelecionadoGlobally" @change="salvarNomeGlobal" style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.9rem; background: #f0f0f0;">
-          <option value="" disabled selected>👤 Entrar como...</option>
-          <option v-for="p in participants" :key="p.name" :value="p.name">{{ p.name }}</option>
-        </select>
-        <div v-else style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
           <span style="font-size: 0.9rem; font-weight: bold; color: #1565c0;">👤 {{ nomeSalvo }}</span>
           <button @click="trocarUsuario" style="background: transparent; border: none; font-size: 0.8rem; color: #f44336; cursor: pointer; text-decoration: underline; padding: 0;">Sair</button>
           <button @click="openAdmin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 0;" title="Acesso Admin">🔒</button>
@@ -38,24 +68,14 @@
           </ul>
         </div>
 
-        <div v-if="isAdmin" style="background: #eceff1; padding: 20px; border: 2px solid #607d8b; border-radius: 8px; margin-bottom: 20px; text-align: left;">
-          <h3 style="color: #263238; margin-top: 0;">⚙️ Painel do Administrador</h3>
-          <p style="font-size: 14px; color: #546e7a;">Edite a lista abaixo e clique no botão para apagar e gerar novo sorteio.</p>
-          <textarea v-model="adminNamesList" rows="8" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></textarea>
-          <button @click="regerarSorteio" style="margin-top: 15px; padding: 12px; background: #E53935; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">🔄 Refazer Sorteio Oficial</button>
-          <button @click="isAdmin = false" style="margin-top: 10px; padding: 10px; background: #90a4ae; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Fechar Painel</button>
-        </div>
-
+        <!-- (Painel do Administrador isolado movido para fora) -->
         <div v-if="savedLocally && !revealedName && !isAdmin" style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9; margin-top: 20px;">
           <p style="font-size: 1.2rem; color: #1565c0; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto neste aparelho!</p>
           <button @click="showSavedResult" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #1976D2; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
         </div>
 
-        <div v-if="!revealedName && !savedLocally && !isAdmin">
-          <div v-if="!nomeSalvo">
-            <p style="font-size: 1.2rem; color: #555;">Selecione seu nome no canto superior direito para participar do sorteio.</p>
-          </div>
-          <div v-else>
+        <div v-if="!revealedName && !savedLocally">
+          <div>
             <p style="font-size: 1.2rem; color: #555;">Você está participando como <b>{{ nomeSalvo }}</b>.</p>
             
             <div v-if="participants.find(p => p.name === nomeSalvo)?.hasSeen" style="background: #ffebee; padding: 15px; border-radius: 8px; border: 1px solid #ef9a9a; margin-top: 15px;">
@@ -67,7 +87,7 @@
           </div>
         </div>
 
-        <div v-if="revealedName && !isAdmin">
+        <div v-if="revealedName">
           <h2>Você tirou:</h2>
           <h1 style="color: #E53935; font-size: 3.5rem; margin: 20px 0; background: #ffebee; padding: 20px; border-radius: 10px; border: 2px dashed #E53935;">{{ revealedName }}</h1>
           <p style="font-size: 1.3rem; font-weight: bold; color: #d32f2f;">📸 Tire um PRINT desta tela para não esquecer!</p>
@@ -76,7 +96,7 @@
           <button @click="resetView" style="margin-top: 10px; padding: 12px; font-size: 16px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Sair e Ocultar</button>
         </div>
 
-        <div v-if="!revealedName && !isAdmin" style="margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px;">
+        <div v-if="!revealedName" style="margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px;">
           <h3 style="color: #666; font-size: 1.1rem;">Ainda faltam tirar:</h3>
           <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px;">
             <span v-for="p in participants.filter(p => !p.hasSeen)" :key="p.name" style="background: #e0e0e0; padding: 8px 16px; border-radius: 20px; font-size: 14px; color: #424242; font-weight: bold;">{{ p.name }}</span>
