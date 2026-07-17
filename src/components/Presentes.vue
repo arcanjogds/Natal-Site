@@ -5,9 +5,17 @@
     <h2 style="color: #0d47a1; margin-top: 0;">🛍️ Vitrine de Presentes</h2>
     <p style="color: #1565c0; margin-bottom: 20px; font-size: 1.1rem;">Dicas do que a família quer ganhar!</p>
 
+    <!-- FILTRO POR NOME -->
+    <div style="margin-bottom: 20px;">
+      <select v-model="filtroFamiliar" style="width: 100%; max-width: 300px; padding: 10px; font-size: 1rem; border-radius: 8px; border: 1px solid #90caf9; color: #1565c0; font-weight: bold;">
+        <option value="">🎁 Ver lista de todos</option>
+        <option v-for="nome in nomesFamilia" :key="nome" :value="nome">Apenas de {{ nome }}</option>
+      </select>
+    </div>
+
     <!-- GRID DE CARDS POR PESSOA -->
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; text-align: left;">
-      <div v-for="nome in nomesFamilia" :key="nome" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #bbdefb; display: flex; flex-direction: column;">
+      <div v-for="nome in nomesFiltrados" :key="nome" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #bbdefb; display: flex; flex-direction: column;">
         
         <!-- HEADER DO CARD (NOME) -->
         <div style="background: #2196f3; padding: 15px; color: white; display: flex; justify-content: center; align-items: center;">
@@ -34,9 +42,13 @@
       </div>
     </div>
 
-    <button @click="adicionarPresente" style="margin-top: 25px; background: #2196f3; color: white; border: none; padding: 15px 20px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; box-shadow: 0 4px 6px rgba(33, 150, 243, 0.3);">
-      ➕ Adicionar meu pedido
-    </button>
+    <!-- BOTAO FLUTUANTE (FAB) -->
+    <div class="fab-container">
+      <button @click="adicionarPresente" class="fab-btn" style="background: #2196f3; color: white;">
+        <span style="font-size: 1.2rem;">➕</span>
+        <span class="fab-text">Adicionar Pedido</span>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -55,6 +67,13 @@ const presentes = ref([]);
 const apiUrl = 'https://natal-bl3x.onrender.com/api/presentes';
 
 const nomesFamilia = computed(() => props.participants.map(p => p.name));
+
+const filtroFamiliar = ref('');
+
+const nomesFiltrados = computed(() => {
+  if (filtroFamiliar.value) return [filtroFamiliar.value];
+  return nomesFamilia.value;
+});
 
 const getPresentes = (nome) => {
   return presentes.value.filter(p => p.nomeFamiliar === nome);
@@ -169,3 +188,41 @@ const editarPresente = async (presente) => {
   }
 };
 </script>
+
+<style scoped>
+.fab-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+.fab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 50px;
+  padding: 15px 25px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+}
+.fab-text {
+  display: inline;
+}
+
+@media (max-width: 600px) {
+  .fab-btn {
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  .fab-text {
+    display: none;
+  }
+}
+</style>

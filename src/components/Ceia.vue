@@ -37,9 +37,13 @@
 
     <div v-if="pratos.length === 0" style="color: #999; margin: 20px 0;">O cardápio ainda está vazio.</div>
 
-    <button @click="adicionarPrato" style="margin-top: 15px; background: #8bc34a; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%;">
-      ➕ Adicionar item ao cardápio
-    </button>
+    <!-- BOTAO FLUTUANTE (FAB) -->
+    <div class="fab-container">
+      <button @click="adicionarPrato" class="fab-btn" style="background: #8bc34a; color: white;">
+        <span style="font-size: 1.2rem;">➕</span>
+        <span class="fab-text">Adicionar item</span>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -197,3 +201,41 @@ const desistirPrato = async (id, nomePrato) => {
   }
 };
 </script>
+
+<style scoped>
+.fab-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+.fab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 50px;
+  padding: 15px 25px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+}
+.fab-text {
+  display: inline;
+}
+
+@media (max-width: 600px) {
+  .fab-btn {
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  .fab-text {
+    display: none;
+  }
+}
+</style>
