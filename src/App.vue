@@ -10,7 +10,9 @@
       
       <select v-model="nomeSelecionadoGlobally" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1.5rem;">
         <option value="" disabled selected>👤 Quem é você?</option>
-        <option v-for="p in participants" :key="p.name" :value="p.name">{{ p.name }}</option>
+        <option v-for="p in participants" :key="p.name" :value="p.name" :disabled="p.hasSeen">
+          {{ p.name }} {{ p.hasSeen ? '(Já logado noutro aparelho)' : '' }}
+        </option>
       </select>
       
       <button @click="salvarNomeGlobal" :disabled="!nomeSelecionadoGlobally" style="width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s;" :style="nomeSelecionadoGlobally ? '' : 'opacity: 0.5; cursor: not-allowed;'">
@@ -28,7 +30,7 @@
       <div style="position: absolute; top: 15px; right: 20px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span style="font-size: 0.9rem; font-weight: bold; color: #1565c0;" v-if="nomeSalvo">👤 {{ nomeSalvo }}</span>
-          <button @click="trocarUsuario" style="background: transparent; border: none; font-size: 0.8rem; color: #f44336; cursor: pointer; text-decoration: underline; padding: 0;" v-if="nomeSalvo">Sair</button>
+          <button @click="trocarUsuario" style="background: transparent; border: none; font-size: 0.8rem; color: #f44336; cursor: pointer; text-decoration: underline; padding: 0;" v-if="nomeSalvo && !savedLocally">Sair</button>
           <button @click="openAdmin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 0;" title="Acesso Admin">🔒</button>
         </div>
       </div>
@@ -175,6 +177,8 @@ const revealSecretSanta = async () => {
       body: JSON.stringify({ name: nameToUse })
     });
     const data = await res.json();
+    if (!res.ok) return Swal.fire('Acesso Bloqueado', data.error || 'Erro ao revelar.', 'error');
+    
     revealedName.value = data.drawnName;
     localStorage.setItem('meuNome', nameToUse);
     nomeSalvo.value = nameToUse;
