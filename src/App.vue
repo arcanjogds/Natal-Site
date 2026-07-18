@@ -29,10 +29,10 @@
         <h3 style="color: #263238; margin-top: 0; font-size: 1.8rem; text-align: center;">⚙️ Painel do Administrador</h3>
         
         <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-          <button @click="adminTab = 'sorteio'" :style="adminTab === 'sorteio' ? activeStyle : inactiveStyle">Sorteio</button>
-          <button @click="adminTab = 'senhas'" :style="adminTab === 'senhas' ? activeStyle : inactiveStyle">Senhas</button>
-          <button @click="adminTab = 'presentes'" :style="adminTab === 'presentes' ? activeStyle : inactiveStyle">Presentes</button>
-          <button @click="adminTab = 'ceia'" :style="adminTab === 'ceia' ? activeStyle : inactiveStyle">Cardápio</button>
+          <a href="?adminTab=sorteio" @click.prevent="adminTab = 'sorteio'" :style="adminTab === 'sorteio' ? activeStyle : inactiveStyle" style="text-decoration: none; display: inline-block; text-align: center;">Sorteio</a>
+          <a href="?adminTab=senhas" @click.prevent="adminTab = 'senhas'" :style="adminTab === 'senhas' ? activeStyle : inactiveStyle" style="text-decoration: none; display: inline-block; text-align: center;">Senhas</a>
+          <a href="?adminTab=presentes" @click.prevent="adminTab = 'presentes'" :style="adminTab === 'presentes' ? activeStyle : inactiveStyle" style="text-decoration: none; display: inline-block; text-align: center;">Presentes</a>
+          <a href="?adminTab=ceia" @click.prevent="adminTab = 'ceia'" :style="adminTab === 'ceia' ? activeStyle : inactiveStyle" style="text-decoration: none; display: inline-block; text-align: center;">Cardápio</a>
         </div>
 
         <div v-if="adminTab === 'sorteio'" style="text-align: center;">
@@ -112,9 +112,9 @@
       <h1 style="color: #c62828; font-size: 2.2rem; margin-bottom: 20px; margin-top: 30px;">🎅 Natal 2026 🎄</h1>
       
       <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap;">
-        <button @click="activeTab = 'sorteio'" :style="activeTab === 'sorteio' ? activeStyle : inactiveStyle">🎁 Amigo Secreto</button>
-        <button @click="activeTab = 'ceia'" :style="activeTab === 'ceia' ? activeStyle : inactiveStyle">🍽️ Cardápio</button>
-        <button @click="activeTab = 'presentes'" :style="activeTab === 'presentes' ? activeStyle : inactiveStyle">🛍️ Vitrine de Presentes</button>
+        <a href="?tab=sorteio" @click.prevent="activeTab = 'sorteio'" :style="activeTab === 'sorteio' ? activeStyle : inactiveStyle" style="text-decoration: none; display: inline-block; text-align: center;">🎁 Amigo Secreto</a>
+        <a href="?tab=ceia" @click.prevent="activeTab = 'ceia'" :style="activeTab === 'ceia' ? activeStyle : inactiveStyle" style="text-decoration: none; display: inline-block; text-align: center;">🍽️ Cardápio</a>
+        <a href="?tab=presentes" @click.prevent="activeTab = 'presentes'" :style="activeTab === 'presentes' ? activeStyle : inactiveStyle" style="text-decoration: none; display: inline-block; text-align: center;">🛍️ Vitrine de Presentes</a>
       </div>
 
       <div v-if="activeTab === 'sorteio'">
@@ -135,7 +135,7 @@
           <h2>Você tirou:</h2>
           <h1 style="color: #E53935; font-size: 3.5rem; margin: 20px 0; background: #ffebee; padding: 20px; border-radius: 10px; border: 2px dashed #E53935;">{{ revealedName }}</h1>
           
-          <button @click="irParaPresentes(revealedName)" style="margin-top: 20px; padding: 12px; font-size: 16px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">🎁 Ver a lista de presentes de {{ revealedName }}</button>
+          <a :href="`?tab=presentes&user=${revealedName}`" @click.prevent="irParaPresentes(revealedName)" style="margin-top: 20px; padding: 12px; font-size: 16px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-decoration: none; display: block; text-align: center; box-sizing: border-box;">🎁 Ver a lista de presentes de {{ revealedName }}</a>
           <button @click="resetView" style="margin-top: 10px; padding: 12px; font-size: 16px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Sair e Ocultar</button>
         </div>
 
@@ -171,6 +171,9 @@ const activeTab = ref(localStorage.getItem('activeTab') || 'sorteio');
 
 watch(activeTab, (newTab) => {
   localStorage.setItem('activeTab', newTab);
+  const url = new URL(window.location);
+  url.searchParams.set('tab', newTab);
+  window.history.pushState({}, '', url);
 });
 
 const activeStyle = 'background: #c62828; color: white; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s;';
@@ -179,7 +182,14 @@ const inactiveStyle = 'background: #e0e0e0; color: #333; border: none; padding: 
 const participants = ref([]);
 const revealedName = ref('');
 const isAdmin = ref(false);
-const adminTab = ref('sorteio');
+const adminTab = ref(localStorage.getItem('adminTab') || 'sorteio');
+
+watch(adminTab, (newTab) => {
+  localStorage.setItem('adminTab', newTab);
+  const url = new URL(window.location);
+  url.searchParams.set('adminTab', newTab);
+  window.history.pushState({}, '', url);
+});
 const adminNamesList = ref('');
 const adminParticipants = ref([]);
 const adminPresentes = ref([]);
@@ -221,6 +231,16 @@ const fetchParticipants = async () => {
 };
 
 onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  if (tabParam) activeTab.value = tabParam;
+  
+  const adminTabParam = urlParams.get('adminTab');
+  if (adminTabParam) adminTab.value = adminTabParam;
+  
+  const userParam = urlParams.get('user');
+  if (userParam) filtroPresentesInicial.value = userParam;
+
   fetchParticipants();
   const storedUser = localStorage.getItem('loggedInUser');
   if (storedUser) {
