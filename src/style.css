@@ -1,0 +1,64 @@
+:root {
+  --bg-natal: #520e12;
+  --grad-gold: linear-gradient(90deg, #d4af37, #f3e5ab);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-natal);
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+.card-natalino {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 15px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff;
+}
+
+.card-natalino h1, .card-natalino h2, .card-natalino h3, .card-natalino p {
+  color: #fff !important;
+}
+
+.btn-brilho {
+  background: var(--grad-gold) !important;
+  color: #520e12 !important;
+  font-weight: bold !important;
+  border-radius: 50px !important;
+  box-shadow: 0 0 15px rgba(243, 229, 171, 0.6) !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-brilho:hover {
+  box-shadow: 0 0 25px rgba(243, 229, 171, 0.9) !important;
+  transform: scale(1.05);
+}
+
+@keyframes snow {
+  0% { transform: translateY(-10vh); }
+  100% { transform: translateY(110vh); }
+}
+
+.snow-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.snowflake {
+  position: absolute;
+  top: -10vh;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: snow linear infinite;
+}

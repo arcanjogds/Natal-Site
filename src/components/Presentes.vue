@@ -1,5 +1,5 @@
 <template>
-  <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 2px solid #2196f3; margin-top: 20px; text-align: center;">
+  <div class="card-natalino" style="padding: 20px; margin-top: 20px; text-align: center;">
     <h2 style="color: #0d47a1; margin-top: 0;">🛍️ Vitrine de Presentes</h2>
     <p style="color: #1565c0; margin-bottom: 20px; font-size: 1.1rem;">Dicas do que a família quer ganhar!</p>
 

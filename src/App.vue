@@ -1,7 +1,11 @@
 <template>
+  <div class="snow-container">
+    <div class="snowflake" v-for="n in 50" :key="n" :style="getSnowflakeStyle()"></div>
+  </div>
+
   <!-- TELA DE LOGIN INICIAL -->
-  <div v-if="!nomeSalvo && !isAdmin" style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center;">
-    <div style="background: white; padding: 3rem 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 400px; position: relative;">
+  <div v-if="!nomeSalvo && !isAdmin" style="background: transparent; min-height: 100vh; padding: 2rem 1rem; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1;">
+    <div class="card-natalino" style="padding: 3rem 2rem; text-align: center; width: 100%; max-width: 400px; position: relative;">
       
       <button @click="openAdmin" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; font-size: 1.2rem; cursor: pointer;" title="Acesso Admin">🔒</button>
 
@@ -17,15 +21,15 @@
 
       <input type="password" v-model="senhaInput" placeholder="Sua Senha (4 dígitos)" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1.5rem; box-sizing: border-box;" v-if="nomeSelecionadoGlobally" />
       
-      <button @click="fazerLogin" :disabled="!nomeSelecionadoGlobally || !senhaInput" style="width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s;" :style="(nomeSelecionadoGlobally && senhaInput) ? '' : 'opacity: 0.5; cursor: not-allowed;'">
+      <button @click="fazerLogin" class="btn-brilho" :disabled="!nomeSelecionadoGlobally || !senhaInput" style="width: 100%; padding: 15px; font-size: 1.1rem; cursor: pointer;" :style="(nomeSelecionadoGlobally && senhaInput) ? '' : 'opacity: 0.5; cursor: not-allowed;'">
         Entrar
       </button>
     </div>
   </div>
 
   <!-- TELA DO ADMINISTRADOR (Isolada) -->
-  <div v-else-if="isAdmin" style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem; display: flex; justify-content: center; align-items: flex-start;">
-    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 800px;">
+  <div v-else-if="isAdmin" style="background: transparent; min-height: 100vh; padding: 2rem 1rem; display: flex; justify-content: center; align-items: flex-start; position: relative; z-index: 1;">
+    <div class="card-natalino" style="padding: 2rem; width: 100%; max-width: 800px;">
         <h3 style="color: #263238; margin-top: 0; font-size: 1.8rem; text-align: center;">⚙️ Painel do Administrador</h3>
         
         <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
@@ -68,7 +72,7 @@
             </tbody>
           </table>
 
-          <button @click="regerarSorteio" style="margin-top: 15px; padding: 12px; background: #E53935; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1.1rem;">🔄 Gerar Sorteio Oficial (Apenas Ativos)</button>
+          <button @click="regerarSorteio" class="btn-brilho" style="margin-top: 15px; padding: 12px; width: 100%; font-size: 1.1rem;">🔄 Gerar Sorteio Oficial (Apenas Ativos)</button>
         </div>
 
         <div v-if="adminTab === 'senhas'">
@@ -131,8 +135,8 @@
   </div>
 
   <!-- SITE PRINCIPAL -->
-  <div v-else style="background: #f5f5f5; min-height: 100vh; padding: 2rem 1rem;">
-    <div style="background: white; text-align: center; font-family: sans-serif; padding: 2rem; width: 100%; max-width: 800px; margin: auto; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative;">
+  <div v-else style="background: transparent; min-height: 100vh; padding: 2rem 1rem; position: relative; z-index: 1;">
+    <div class="card-natalino" style="text-align: center; font-family: sans-serif; padding: 2rem; width: 100%; max-width: 800px; margin: auto; box-sizing: border-box; position: relative;">
       
       <div style="position: absolute; top: 15px; right: 20px;">
         <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: flex-end;">
@@ -159,7 +163,7 @@
         </div>
 
         <div v-else-if="!revealedName" style="text-align: center; padding: 20px 0;">
-          <button @click="revealSecretSanta" class="btn-reveal">
+          <button @click="revealSecretSanta" class="btn-reveal btn-brilho">
             🎁 Revelar meu Amigo Secreto 🎁
           </button>
         </div>
@@ -197,6 +201,15 @@ import { ref, onMounted, watch, computed } from 'vue';
 import Swal from 'sweetalert2';
 import Ceia from './components/Ceia.vue';
 import Presentes from './components/Presentes.vue';
+
+const getSnowflakeStyle = () => ({
+  left: Math.random() * 100 + 'vw',
+  width: Math.random() * 8 + 2 + 'px',
+  height: Math.random() * 8 + 2 + 'px',
+  animationDuration: Math.random() * 3 + 2 + 's',
+  animationDelay: Math.random() * 5 + 's',
+  opacity: Math.random()
+});
 
 const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : 'https://natal-bl3x.onrender.com';
 

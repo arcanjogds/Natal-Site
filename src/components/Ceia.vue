@@ -1,5 +1,5 @@
 <template>
-  <div style="background: #f1f8e9; padding: 20px; border-radius: 8px; border: 2px solid #8bc34a; margin-top: 20px; text-align: center;">
+  <div class="card-natalino" style="padding: 20px; margin-top: 20px; text-align: center;">
     <h2 style="color: #33691e; margin-top: 0;">🍽️ Cardápio da Ceia</h2>
     <p style="color: #558b2f; margin-bottom: 20px; font-size: 1.1rem;">Escolha o que você vai levar para a nossa ceia!</p>
 
