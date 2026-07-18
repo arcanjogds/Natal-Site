@@ -118,12 +118,7 @@
       </div>
 
       <div v-if="activeTab === 'sorteio'">
-        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; border: 2px dashed #ff9800; margin-bottom: 25px; text-align: left;">
-          <h3 style="color: #e65100; margin: 0 0 10px 0; text-align: center;">📜 Regra do Jogo</h3>
-          <ul style="margin: 0; padding-left: 20px; font-size: 1.1rem; color: #d84315; font-weight: bold; line-height: 1.5;">
-            <li>🎁 Valor do presente: Mínimo de R$ 150,00</li>
-          </ul>
-        </div>
+
 
         <div v-if="amigoSorteadoCache" style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9; margin-top: 20px;">
           <p style="font-size: 1.2rem; color: #1565c0; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto!</p>

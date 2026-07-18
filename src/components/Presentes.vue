@@ -124,6 +124,21 @@ const adicionarPresente = async () => {
     confirmButtonColor: '#2196f3',
     confirmButtonText: 'Salvar Pedido',
     cancelButtonText: 'Cancelar',
+    didOpen: () => {
+      const valorInput = document.getElementById('swal-valor');
+      if (valorInput.value === '') valorInput.value = 'R$ ';
+      valorInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, "");
+        if (!value) {
+            e.target.value = "R$ ";
+            return;
+        }
+        value = (parseInt(value, 10) / 100).toFixed(2) + '';
+        value = value.replace(".", ",");
+        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+        e.target.value = "R$ " + value;
+      });
+    },
     preConfirm: () => {
       const nomeFamiliar = props.usuarioAtual;
       const item = document.getElementById('swal-item').value;
@@ -133,6 +148,11 @@ const adicionarPresente = async () => {
       
       if (!item) {
         Swal.showValidationMessage('O item é obrigatório!');
+        return false;
+      }
+      const numValor = parseFloat(valor.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
+      if (isNaN(numValor) || numValor < 150) {
+        Swal.showValidationMessage('O valor mínimo é R$ 150,00!');
         return false;
       }
       if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
@@ -179,6 +199,21 @@ const editarPresente = async (presente) => {
     showCancelButton: true,
     confirmButtonColor: '#2196f3',
     confirmButtonText: 'Salvar',
+    didOpen: () => {
+      const valorInput = document.getElementById('swal-edit-valor');
+      if (valorInput.value === '') valorInput.value = 'R$ ';
+      valorInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, "");
+        if (!value) {
+            e.target.value = "R$ ";
+            return;
+        }
+        value = (parseInt(value, 10) / 100).toFixed(2) + '';
+        value = value.replace(".", ",");
+        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+        e.target.value = "R$ " + value;
+      });
+    },
     preConfirm: () => {
       const item = document.getElementById('swal-edit-item').value;
       const valor = document.getElementById('swal-edit-valor').value;
@@ -187,6 +222,11 @@ const editarPresente = async (presente) => {
       
       if (!item) {
         Swal.showValidationMessage('O item é obrigatório!');
+        return false;
+      }
+      const numValor = parseFloat(valor.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
+      if (isNaN(numValor) || numValor < 150) {
+        Swal.showValidationMessage('O valor mínimo é R$ 150,00!');
         return false;
       }
       if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
