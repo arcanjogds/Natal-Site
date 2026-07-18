@@ -47,23 +47,23 @@
             <button @click="adminAdicionarParticipante" style="padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Adicionar</button>
           </div>
 
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+          <table class="admin-table">
             <thead>
-              <tr style="background: #eee;">
-                <th style="padding: 10px; border: 1px solid #ccc; text-align: left;">Nome</th>
-                <th style="padding: 10px; border: 1px solid #ccc; width: 150px;">Ações</th>
+              <tr>
+                <th>Nome</th>
+                <th style="width: 150px;">Ações</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="p in sortedAdminParticipantsSorteio" :key="p._id">
-                <td style="padding: 10px; border: 1px solid #ccc;">
+                <td>
                   <span v-if="p.isActive" style="color: #2e7d32; font-weight: bold;">
                     {{ p.name }}
                     <span v-if="p.hasSeen" title="Já viu quem tirou no sorteio"> 👀</span>
                   </span>
                   <span v-else style="color: #999; text-decoration: line-through;">{{ p.name }} (Inativo)</span>
                 </td>
-                <td style="padding: 10px; border: 1px solid #ccc; text-align: center; white-space: nowrap;">
+                <td style="text-align: center; white-space: nowrap;">
                   <button @click="adminToggleAtivo(p)" :style="{ background: p.isActive ? '#ff9800' : '#4CAF50' }" style="color: white; border: none; border-radius: 3px; padding: 6px; cursor: pointer; font-size: 1rem; margin-right: 5px;" :title="p.isActive ? 'Desativar Participante' : 'Ativar Participante'">{{ p.isActive ? '⏸️' : '▶️' }}</button>
                   <button @click="adminEditarParticipante(p)" style="background: #2196f3; color: white; border: none; border-radius: 3px; padding: 6px; cursor: pointer; font-size: 1rem; margin-right: 5px;" title="Editar Nome">✏️</button>
                   <button @click="adminDeletarParticipante(p)" style="background: #f44336; color: white; border: none; border-radius: 3px; padding: 6px; cursor: pointer; font-size: 1rem;" title="Apagar Permanentemente">🗑️</button>
@@ -77,25 +77,25 @@
 
         <div v-if="adminTab === 'senhas'">
           <h4 style="color: #333;">Participantes e Senhas</h4>
-          <table style="width: 100%; border-collapse: collapse;">
+          <table class="admin-table">
             <thead>
-              <tr style="background: #eee;">
-                <th style="padding: 10px; border: 1px solid #ccc;">Nome</th>
-                <th style="padding: 10px; border: 1px solid #ccc;">Senha Atual</th>
-                <th style="padding: 10px; border: 1px solid #ccc;">Alterou a Senha?</th>
+              <tr>
+                <th>Nome</th>
+                <th>Senha Atual</th>
+                <th>Alterou a Senha?</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="p in sortedAdminParticipantsSenhas" :key="p._id">
-                <td style="padding: 10px; border: 1px solid #ccc;">
+                <td>
                   <span v-if="p.name === nomeSalvo" style="background: #ffebee; color: #c62828; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-right: 5px;">Admin</span>
                   {{ p.name }}
                   <span v-if="p.isActive === false" style="color: #999; font-size: 0.8rem; margin-left: 5px;">(Inativo)</span>
                 </td>
-                <td style="padding: 10px; border: 1px solid #ccc; font-family: monospace;">{{ p.password }}</td>
-                <td style="padding: 10px; border: 1px solid #ccc;">
+                <td style="font-family: monospace;">{{ p.password }}</td>
+                <td>
                   {{ p.passwordChanged ? '✅ Sim' : '❌ Não' }}
-                  <button @click="adminAlterarSenha(p.name)" style="margin-left: 10px; background: #2196f3; color: white; border: none; border-radius: 3px; padding: 4px 8px; cursor: pointer; font-size: 0.8rem;">Alterar</button>
+                  <button @click="adminAlterarSenha(p.name)" style="margin-left: 10px; background: #2e7d32; color: white; border: none; border-radius: 3px; padding: 4px 8px; cursor: pointer; font-size: 0.8rem;">Alterar</button>
                 </td>
               </tr>
             </tbody>
@@ -130,7 +130,7 @@
           </div>
         </div>
 
-        <button @click="sairAdmin" style="margin-top: 20px; padding: 10px; background: #90a4ae; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1rem;">Sair do Painel</button>
+        <button @click="sairAdmin" class="btn-outline" style="margin-top: 20px; padding: 10px; width: 100%; font-size: 1rem;">Sair do Painel</button>
     </div>
   </div>
 

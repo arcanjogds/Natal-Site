@@ -5,7 +5,7 @@
 
     <!-- FILTRO POR NOME -->
     <div style="margin-bottom: 20px;">
-      <select v-model="filtroFamiliar" style="width: 100%; max-width: 300px; padding: 10px; font-size: 1rem; border-radius: 8px; border: 1px solid #90caf9; color: #1565c0; font-weight: bold;">
+      <select v-model="filtroFamiliar" style="width: 100%; max-width: 300px; padding: 10px; font-size: 1rem; border-radius: 8px; font-weight: bold;">
         <option value="">🎁 Ver lista de todos</option>
         <option v-for="nome in nomesFamilia" :key="nome" :value="nome">Apenas de {{ nome }}</option>
       </select>
@@ -13,28 +13,28 @@
 
     <!-- LISTA DE CARDS POR PESSOA -->
     <div style="display: flex; flex-direction: column; gap: 20px; text-align: left;">
-      <div v-for="nome in nomesFiltrados" :key="nome" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #bbdefb; display: flex; flex-direction: column; width: 100%;">
+      <div v-for="nome in nomesFiltrados" :key="nome" style="background: #fff9f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid var(--bg-natal); display: flex; flex-direction: column; width: 100%;">
         
         <!-- HEADER DO CARD (NOME) -->
-        <div style="background: #2196f3; padding: 15px; color: white; display: flex; justify-content: center; align-items: center;">
+        <div style="background: var(--bg-natal); padding: 15px; color: #f3e5ab; display: flex; justify-content: center; align-items: center;">
           <h3 style="margin: 0; font-size: 1.4rem;">{{ nome }}</h3>
         </div>
 
         <!-- LISTA DE PRESENTES DESSA PESSOA -->
-        <div style="padding: 15px; flex-grow: 1; background: #fafafa;">
+        <div style="padding: 15px; flex-grow: 1;">
           <div v-if="getPresentes(nome).length === 0" style="color: #999; font-size: 0.9rem; font-style: italic; text-align: center; margin-top: 10px;">
             Ainda não pediu nada.
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-            <div v-for="presente in getPresentes(nome)" :key="presente._id" style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e0e0e0; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <div v-for="presente in getPresentes(nome)" :key="presente._id" style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e5c09e; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
               <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 8px;">
-                <button @click="editarPresente(presente)" style="background: transparent; border: none; color: #1976d2; cursor: pointer; font-size: 1rem;" title="Editar pedido">✏️</button>
-                <button @click="deletarPresente(presente._id)" style="background: transparent; border: none; color: #f44336; cursor: pointer; font-size: 1.1rem;" title="Remover pedido">✖</button>
+                <button @click="editarPresente(presente)" style="background: transparent; border: none; color: #2e7d32; cursor: pointer; font-size: 1rem;" title="Editar pedido">✏️</button>
+                <button @click="deletarPresente(presente._id)" style="background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 1.1rem;" title="Remover pedido">✖</button>
               </div>
               <p style="margin: 0; font-weight: bold; color: #333; padding-right: 45px;">{{ presente.item }}</p>
               <p v-if="presente.valor" style="margin: 5px 0 0 0; font-size: 0.95rem; color: #4CAF50; font-weight: bold;">💰 {{ presente.valor }}</p>
               <p v-if="presente.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">📝 {{ presente.tamanhoEspecificacao }}</p>
-              <a v-if="presente.linkLoja" :href="presente.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #1976d2; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #1976d2;">🛒 Ver na Loja</a>
+              <a v-if="presente.linkLoja" :href="presente.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #c62828; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #c62828;">🛒 Ver na Loja</a>
             </div>
           </div>
         </div>
@@ -45,7 +45,7 @@
 
   <!-- BOTAO FLUTUANTE (FAB) -->
   <div class="fab-container">
-    <button @click="adicionarPresente" class="fab-btn" style="background: #2196f3; color: white;">
+    <button @click="adicionarPresente" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);">
       <span style="font-size: 1.2rem;">➕</span>
       <span class="fab-text">Adicionar Pedido</span>
     </button>

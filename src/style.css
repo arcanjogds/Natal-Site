@@ -62,3 +62,74 @@ body {
   opacity: 0.8;
   animation: snow linear infinite;
 }
+
+/* SweetAlert2 Button Overrides */
+.swal2-confirm {
+  background-color: #2e7d32 !important; /* Green */
+  color: white !important;
+}
+
+.swal2-cancel {
+  background-color: #c62828 !important; /* Red */
+  color: white !important;
+}
+
+.swal2-popup {
+  background-color: #fff9f0 !important; /* Warm white */
+  border-radius: 15px !important;
+}
+
+.swal2-title, .swal2-html-container, .swal2-validation-message {
+  color: #333 !important;
+}
+
+/* Inputs and Selects Global Overrides */
+input, select {
+  outline: none !important;
+  border: 1px solid #ccc;
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
+
+input:focus, select:focus {
+  border-color: var(--bg-natal) !important;
+  box-shadow: 0 0 5px rgba(198, 40, 40, 0.5) !important;
+}
+
+/* Admin Tables */
+.admin-table {
+  width: 100%;
+  border-collapse: separate !important;
+  border-spacing: 0;
+  margin-bottom: 20px;
+  background: #fff9f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.admin-table th {
+  background: var(--bg-natal);
+  color: #f3e5ab; /* Gold */
+  padding: 12px;
+  text-align: left;
+}
+
+.admin-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f0e6d6;
+  color: #333;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--bg-natal);
+  border: 2px solid var(--bg-natal);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+.btn-outline:hover {
+  background: #ffebee;
+}

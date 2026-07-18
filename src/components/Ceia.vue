@@ -5,7 +5,7 @@
 
     <!-- ÁREA DE FILTROS -->
     <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-      <select v-model="filtroCategoria" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; background: white;">
+      <select v-model="filtroCategoria" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; font-size: 1rem;">
         <option value="Todas">Todas as Categorias</option>
         <option value="Principal">Principal</option>
         <option value="Acompanhamento">Acompanhamento</option>
@@ -13,14 +13,14 @@
         <option value="Bebida">Bebida</option>
       </select>
 
-      <select v-model="filtroResponsavel" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; background: white;">
+      <select v-model="filtroResponsavel" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 8px; font-size: 1rem;">
         <option value="Todos">Todas as Pessoas</option>
         <option value="Sem Ninguém">❌ Sem ninguém (Livres)</option>
         <option v-for="nome in nomesFamilia" :key="nome" :value="nome">🙋 {{ nome }}</option>
       </select>
     </div>
 
-    <div v-for="prato in pratosFiltrados" :key="prato._id" style="background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px;">
+    <div v-for="prato in pratosFiltrados" :key="prato._id" style="background: #fff9f0; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px;">
       
       <!-- Linha Superior: Nome, Categoria e Controles -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
@@ -29,8 +29,8 @@
           <span style="display: block; font-size: 0.85rem; color: #757575; text-transform: uppercase; margin-top: 3px;">{{ prato.categoria }}</span>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button @click="editarPrato(prato)" style="background: #e3f2fd; border: 1px solid #bbdefb; color: #1976d2; cursor: pointer; font-size: 1rem; border-radius: 5px; padding: 4px 8px;" title="Editar Prato">✏️</button>
-          <button @click="deletarPrato(prato._id)" style="background: #ffebee; border: 1px solid #ffcdd2; color: #f44336; cursor: pointer; font-size: 1rem; border-radius: 5px; padding: 4px 8px;" title="Remover Prato">✖</button>
+          <button @click="editarPrato(prato)" style="background: #e8f5e9; border: 1px solid #c8e6c9; color: #2e7d32; cursor: pointer; font-size: 1rem; border-radius: 5px; padding: 4px 8px;" title="Editar Prato">✏️</button>
+          <button @click="deletarPrato(prato._id)" style="background: #ffebee; border: 1px solid #ffcdd2; color: #c62828; cursor: pointer; font-size: 1rem; border-radius: 5px; padding: 4px 8px;" title="Remover Prato">✖</button>
         </div>
       </div>
 
@@ -44,7 +44,7 @@
             Desistir
           </button>
         </div>
-        <button v-else @click="assumirPrato(prato._id, prato.nomePrato)" style="background: #ff9800; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%;">
+        <button v-else @click="assumirPrato(prato._id, prato.nomePrato)" style="background: #2e7d32; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%;">
           🙋 Eu levo!
         </button>
       </div>
@@ -56,7 +56,7 @@
 
   <!-- BOTAO FLUTUANTE (FAB) -->
   <div class="fab-container">
-    <button @click="adicionarPrato" class="fab-btn" style="background: #8bc34a; color: white;">
+    <button @click="adicionarPrato" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);">
       <span style="font-size: 1.2rem;">➕</span>
       <span class="fab-text">Adicionar item</span>
     </button>
