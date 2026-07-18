@@ -51,7 +51,9 @@
                    <p style="margin: 0; font-weight: bold; color: #333333;">{{ item.item }}</p>
                    <p v-if="item.valor" style="margin: 5px 0 0 0; font-size: 0.95rem; color: #2e7d32; font-weight: bold;">💰 R$ {{ item.valor.toFixed(2).replace('.', ',') }}</p>
                    <p v-if="item.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #333333;">📝 {{ item.tamanhoEspecificacao }}</p>
-                   <a v-if="item.linkLoja" :href="item.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #8b0000; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #8b0000;">🛒 Ver na Loja</a>
+                   <div v-if="item.linkLoja" style="margin-top: 8px; display: flex; flex-direction: column; gap: 5px;">
+                     <a v-for="(link, i) in item.linkLoja.split('\\n')" :key="i" :href="link" target="_blank" style="display: inline-block; color: #8b0000; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #8b0000; align-self: flex-start;">🛒 Ver na Loja {{ item.linkLoja.split('\\n').length > 1 ? i + 1 : '' }}</a>
+                   </div>
                 </div>
               </div>
 
@@ -168,7 +170,7 @@ const adicionarPresente = async (isKit = false) => {
     if (isKit && itensDoPedido.length === 0) {
       htmlForm += `
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Nome do Kit (Ex: Kit Praia):</label>
-        <input id="swal-nome-kit" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Opcional" value="${nomeKitCache}">
+        <input id="swal-nome-kit" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;" placeholder="Opcional" value="${nomeKitCache}">
         <hr style="margin: 15px 0;">
       `;
     } else if (isKit) {
@@ -183,16 +185,16 @@ const adicionarPresente = async (isKit = false) => {
 
     htmlForm += `
       <label style="font-weight: bold; font-size: 14px; color: #333333;">Item:</label>
-      <input id="swal-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Ex: Perfume">
+      <input id="swal-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;" placeholder="Ex: Perfume">
 
       <label style="font-weight: bold; font-size: 14px; color: #333333;">Valor do Item (R$):</label>
-      <input id="swal-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="R$ 0,00">
+      <input id="swal-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;" placeholder="R$ 0,00">
 
       <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
-      <input id="swal-espec" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+      <input id="swal-espec" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;">
 
-      <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja:</label>
-      <input id="swal-link" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+      <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja (separados por linha):</label>
+      <textarea id="swal-link" class="swal2-textarea" style="width: 100%; box-sizing: border-box; margin: 0 0 15px 0; max-width: 100%; min-height: 60px; font-size: 14px;"></textarea>
     `;
     
     if (isKit) {
@@ -235,18 +237,20 @@ const adicionarPresente = async (isKit = false) => {
         const tamanhoEspecificacao = document.getElementById('swal-espec').value;
         let linkLoja = document.getElementById('swal-link').value;
         
+        if (linkLoja) {
+          linkLoja = linkLoja.split(/[,\\n]+/).map(l => l.trim()).filter(l => l).map(l => l.startsWith('http') ? l : 'https://' + l).join('\\n');
+        }
+
         if (isKit && isAddMais) {
           if (!item) {
              Swal.showValidationMessage('Preencha o nome do item antes de adicionar!');
              return false;
           }
-          if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
           itensDoPedido.push({ item, valor, tamanhoEspecificacao, linkLoja });
           return { addMais: true, nomeKitAtual: nomeKit };
         } else {
           let finalItens = [...itensDoPedido];
           if (item) {
-            if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
             finalItens.push({ item, valor, tamanhoEspecificacao, linkLoja });
           }
           if (finalItens.length === 0) {
@@ -291,7 +295,7 @@ const editarKit = async (kit) => {
     html: `
       <div style="text-align: left;">
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Nome do Pedido (Ex: Kit Verão):</label>
-        <input id="swal-edit-nome" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="${kit.nomeKit}">
+        <input id="swal-edit-nome" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;" value="${kit.nomeKit}">
       </div>
     `,
     showCancelButton: true,
@@ -318,16 +322,16 @@ const editarIndividual = async (kit) => {
     html: `
       <div style="text-align: left;">
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Item:</label>
-        <input id="swal-edit-ind-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="${item.item || ''}">
+        <input id="swal-edit-ind-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;" value="${item.item || ''}">
         
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Valor (R$):</label>
-        <input id="swal-edit-ind-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="R$ ${(item.valor || 0).toFixed(2).replace('.', ',')}">
+        <input id="swal-edit-ind-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;" value="R$ ${(item.valor || 0).toFixed(2).replace('.', ',')}">
         
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
-        <input id="swal-edit-ind-desc" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="${item.tamanhoEspecificacao || ''}">
+        <input id="swal-edit-ind-desc" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;" value="${item.tamanhoEspecificacao || ''}">
         
-        <label style="font-weight: bold; font-size: 14px; color: #333333;">Link:</label>
-        <input id="swal-edit-ind-link" class="swal2-input" style="width: 100%; box-sizing: border-box;" value="${item.linkLoja || ''}">
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja (separados por linha):</label>
+        <textarea id="swal-edit-ind-link" class="swal2-textarea" style="width: 100%; box-sizing: border-box; margin: 0 0 15px 0; max-width: 100%; min-height: 60px; font-size: 14px;">${item.linkLoja || ''}</textarea>
       </div>
     `,
     showCancelButton: true,
@@ -343,7 +347,9 @@ const editarIndividual = async (kit) => {
         Swal.showValidationMessage('O nome do item é obrigatório!');
         return false;
       }
-      if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
+      if (linkLoja) {
+        linkLoja = linkLoja.split(/[,\\n]+/).map(l => l.trim()).filter(l => l).map(l => l.startsWith('http') ? l : 'https://' + l).join('\\n');
+      }
       return { item: novoItem, valor, tamanhoEspecificacao, linkLoja };
     }
   });
@@ -367,13 +373,13 @@ const adicionarSubItem = async (kit) => {
     html: `
       <div style="text-align: left;">
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Item:</label>
-        <input id="swal-sub-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+        <input id="swal-sub-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;">
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Valor (R$):</label>
-        <input id="swal-sub-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="R$ 0,00">
+        <input id="swal-sub-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;" placeholder="R$ 0,00">
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
-        <input id="swal-sub-desc" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
-        <label style="font-weight: bold; font-size: 14px; color: #333333;">Link:</label>
-        <input id="swal-sub-link" class="swal2-input" style="width: 100%; box-sizing: border-box;">
+        <input id="swal-sub-desc" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;">
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja (separados por linha):</label>
+        <textarea id="swal-sub-link" class="swal2-textarea" style="width: 100%; box-sizing: border-box; margin: 0 0 15px 0; max-width: 100%; min-height: 60px; font-size: 14px;"></textarea>
       </div>
     `,
     showCancelButton: true,
@@ -389,7 +395,9 @@ const adicionarSubItem = async (kit) => {
         Swal.showValidationMessage('O nome do item é obrigatório!');
         return false;
       }
-      if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
+      if (linkLoja) {
+        linkLoja = linkLoja.split(/[,\\n]+/).map(l => l.trim()).filter(l => l).map(l => l.startsWith('http') ? l : 'https://' + l).join('\\n');
+      }
       return { item, valor, tamanhoEspecificacao, linkLoja };
     }
   });
