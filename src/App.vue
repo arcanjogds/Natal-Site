@@ -53,7 +53,10 @@
             </thead>
             <tbody>
               <tr v-for="p in adminParticipants" :key="p.name">
-                <td style="padding: 10px; border: 1px solid #ccc;">{{ p.name }}</td>
+                <td style="padding: 10px; border: 1px solid #ccc;">
+                  {{ p.name }}
+                  <span v-if="p.isActive === false" style="color: #999; font-size: 0.8rem; margin-left: 5px;">(Inativo)</span>
+                </td>
                 <td style="padding: 10px; border: 1px solid #ccc; font-family: monospace;">{{ p.password }}</td>
                 <td style="padding: 10px; border: 1px solid #ccc;">
                   {{ p.passwordChanged ? '✅ Sim' : '❌ Não' }}
@@ -292,8 +295,8 @@ const abrirPerfil = async () => {
   const { value: formValues } = await Swal.fire({
     title: 'Alterar Senha',
     html:
-      '<input id="swal-old-pass" class="swal2-input" placeholder="Senha Atual" type="password">' +
-      '<input id="swal-new-pass" class="swal2-input" placeholder="Nova Senha (min 4 caracteres)" type="password">',
+      '<input id="swal-old-pass" class="swal2-input" placeholder="Senha Atual" type="password" style="box-sizing: border-box; width: calc(100% - 2em); max-width: 100%;">' +
+      '<input id="swal-new-pass" class="swal2-input" placeholder="Nova Senha (min 4 caracteres)" type="password" style="box-sizing: border-box; width: calc(100% - 2em); max-width: 100%;">',
     focusConfirm: false,
     showCancelButton: true,
     confirmButtonText: 'Salvar',
