@@ -73,7 +73,7 @@
           <div v-for="p in adminPresentes" :key="p._id" style="padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
             <input type="checkbox" v-model="p.selecionado" style="width: 20px; height: 20px;" />
             <div>
-              <strong>{{ p.nomeFamiliar }}</strong>: {{ p.item }} <span v-if="p.tamanhoEspecificacao">({{ p.tamanhoEspecificacao }})</span>
+              <strong>{{ p.nomeFamiliar }}</strong>: {{ p.item }} <span v-if="p.valor">[Valor: {{ p.valor }}]</span> <span v-if="p.tamanhoEspecificacao">({{ p.tamanhoEspecificacao }})</span>
             </div>
           </div>
         </div>

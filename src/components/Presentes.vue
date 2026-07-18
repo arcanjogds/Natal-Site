@@ -32,6 +32,7 @@
                 <button @click="deletarPresente(presente._id)" style="background: transparent; border: none; color: #f44336; cursor: pointer; font-size: 1.1rem;" title="Remover pedido">✖</button>
               </div>
               <p style="margin: 0; font-weight: bold; color: #333; padding-right: 45px;">{{ presente.item }}</p>
+              <p v-if="presente.valor" style="margin: 5px 0 0 0; font-size: 0.95rem; color: #4CAF50; font-weight: bold;">💰 {{ presente.valor }}</p>
               <p v-if="presente.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">📝 {{ presente.tamanhoEspecificacao }}</p>
               <a v-if="presente.linkLoja" :href="presente.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #1976d2; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #1976d2;">🛒 Ver na Loja</a>
             </div>
@@ -105,10 +106,13 @@ const adicionarPresente = async () => {
     title: 'Sua lista de desejos',
     html: `
       <div style="text-align: left;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">O que você quer?</label>
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Presente:</label>
         <input id="swal-item" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" placeholder="Ex: Perfume Boticário">
 
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Tamanho ou Detalhe:</label>
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Valor:</label>
+        <input id="swal-valor" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" placeholder="Ex: R$ 150,00">
+
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Descrição:</label>
         <input id="swal-espec" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" placeholder="Ex: 220v, Tam M">
 
         <label style="font-weight: bold; font-size: 14px; color: #333;">Link da loja (Opcional):</label>
@@ -123,6 +127,7 @@ const adicionarPresente = async () => {
     preConfirm: () => {
       const nomeFamiliar = props.usuarioAtual;
       const item = document.getElementById('swal-item').value;
+      const valor = document.getElementById('swal-valor').value;
       const tamanhoEspecificacao = document.getElementById('swal-espec').value;
       let linkLoja = document.getElementById('swal-link').value;
       
@@ -131,7 +136,7 @@ const adicionarPresente = async () => {
         return false;
       }
       if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
-      return { nomeFamiliar, item, tamanhoEspecificacao, linkLoja };
+      return { nomeFamiliar, item, valor, tamanhoEspecificacao, linkLoja };
     }
   });
 
@@ -157,10 +162,13 @@ const editarPresente = async (presente) => {
     title: 'Editar Pedido',
     html: `
       <div style="text-align: left;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">O que você quer?</label>
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Presente:</label>
         <input id="swal-edit-item" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" value="${presente.item}">
 
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Tamanho ou Detalhe:</label>
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Valor:</label>
+        <input id="swal-edit-valor" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" value="${presente.valor || ''}">
+
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Descrição:</label>
         <input id="swal-edit-espec" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" value="${presente.tamanhoEspecificacao || ''}">
 
         <label style="font-weight: bold; font-size: 14px; color: #333;">Link da loja (Opcional):</label>
@@ -173,6 +181,7 @@ const editarPresente = async (presente) => {
     confirmButtonText: 'Salvar',
     preConfirm: () => {
       const item = document.getElementById('swal-edit-item').value;
+      const valor = document.getElementById('swal-edit-valor').value;
       const tamanhoEspecificacao = document.getElementById('swal-edit-espec').value;
       let linkLoja = document.getElementById('swal-edit-link').value;
       
@@ -181,7 +190,7 @@ const editarPresente = async (presente) => {
         return false;
       }
       if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
-      return { item, tamanhoEspecificacao, linkLoja };
+      return { item, valor, tamanhoEspecificacao, linkLoja };
     }
   });
 
