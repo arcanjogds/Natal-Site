@@ -77,6 +77,8 @@ body {
 .swal2-popup {
   background-color: #fff9f0 !important; /* Warm white */
   border-radius: 15px !important;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .swal2-title, .swal2-html-container, .swal2-validation-message {
