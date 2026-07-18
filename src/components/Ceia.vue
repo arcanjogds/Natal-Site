@@ -52,14 +52,14 @@
 
     <div v-if="pratosFiltrados.length === 0" style="color: #999; margin: 20px 0;">O cardápio ainda está vazio ou nenhum prato corresponde ao filtro.</div>
 
-    <!-- BOTAO FLUTUANTE (FAB) -->
-    <div class="fab-container">
-      <button @click="adicionarPrato" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);">
-        <span style="font-size: 1.2rem;">➕</span>
-        <span class="fab-text">Adicionar item</span>
-      </button>
-    </div>
+  </div>
 
+  <!-- BOTAO FLUTUANTE (FAB) -->
+  <div class="fab-container">
+    <button @click="adicionarPrato" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+      <span style="font-size: 1.2rem;">➕</span>
+      <span class="fab-text">Adicionar item</span>
+    </button>
   </div>
 </template>
 
@@ -235,9 +235,10 @@ const desistirPrato = async (id, nomePrato) => {
 
 <style scoped>
 .fab-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
 }
 .fab-btn {
   display: flex;

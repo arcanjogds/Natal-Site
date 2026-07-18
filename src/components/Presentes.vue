@@ -40,15 +40,14 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- BOTAO FLUTUANTE (FAB) -->
-    <div class="fab-container">
-      <button @click="adicionarPresente" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);">
-        <span style="font-size: 1.2rem;">➕</span>
-        <span class="fab-text">Adicionar Pedido</span>
-      </button>
-    </div>
-
+  <!-- BOTAO FLUTUANTE (FAB) -->
+  <div class="fab-container">
+    <button @click="adicionarPresente" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+      <span style="font-size: 1.2rem;">➕</span>
+      <span class="fab-text">Adicionar Pedido</span>
+    </button>
   </div>
 </template>
 
@@ -247,9 +246,10 @@ const editarPresente = async (presente) => {
 
 <style scoped>
 .fab-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
 }
 .fab-btn {
   display: flex;

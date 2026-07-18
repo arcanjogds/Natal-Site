@@ -157,9 +157,9 @@
 
       <div v-if="activeTab === 'sorteio'">
 
-        <div v-if="amigoSorteadoCache && !revealedName" style="background: #fff9f0; padding: 20px; border-radius: 8px; border: 1px solid #e5c09e; margin-top: 20px;">
-          <p style="font-size: 1.2rem; color: #c62828; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto!</p>
-          <button @click="mostrarAmigoSorteadoCache" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #2e7d32; color: black; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
+        <div v-if="amigoSorteadoCache && !revealedName" style="background-color: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); padding: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.3); margin-top: 20px; color: #ffffff; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);">
+          <p style="font-size: 1.2rem; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto!</p>
+          <button @click="mostrarAmigoSorteadoCache" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #2e7d32; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">👀 Ver meu resultado novamente</button>
         </div>
 
         <div v-else-if="!revealedName" style="text-align: center; padding: 20px 0;">
@@ -170,7 +170,7 @@
 
         <div v-if="revealedName">
           <h2>Você tirou:</h2>
-          <h1 style="color: #E53935; font-size: 3.5rem; margin: 20px 0; background: #ffebee; padding: 20px; border-radius: 10px; border: 2px dashed #E53935;">{{ revealedName }}</h1>
+          <h1 style="color: #ffffff; font-size: 3.5rem; font-weight: 900; margin: 20px 0; background-color: #8B0000; padding: 20px; border-radius: 10px; border: 2px dashed #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">{{ revealedName }}</h1>
           
           <a :href="`?tab=presentes&user=${revealedName}`" @click.prevent="irParaPresentes(revealedName)" style="margin-top: 20px; padding: 12px; font-size: 16px; background: #2e7d32; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-decoration: none; display: block; text-align: center; box-sizing: border-box;">🎁 Ver a lista de presentes de {{ revealedName }}</a>
           <button @click="resetView" style="margin-top: 10px; padding: 12px; font-size: 16px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Sair e Ocultar</button>
