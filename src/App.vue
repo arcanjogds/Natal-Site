@@ -159,7 +159,7 @@
 
         <div v-if="amigoSorteadoCache && !revealedName" style="background: #fff9f0; padding: 20px; border-radius: 8px; border: 1px solid #e5c09e; margin-top: 20px;">
           <p style="font-size: 1.2rem; color: #c62828; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto!</p>
-          <button @click="mostrarAmigoSorteadoCache" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #2e7d32; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
+          <button @click="mostrarAmigoSorteadoCache" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #2e7d32; color: black; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
         </div>
 
         <div v-else-if="!revealedName" style="text-align: center; padding: 20px 0;">
