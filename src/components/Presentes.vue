@@ -26,17 +26,17 @@
             Ainda não pediu nada.
           </div>
           <div style="display: flex; flex-direction: column; gap: 15px;">
-            <div v-for="kit in getPresentes(nome)" :key="kit._id" style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e5c09e; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <div v-for="kit in getPresentes(nome)" :key="kit._id" :style="kit.isKit !== false ? 'background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e5c09e; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);' : 'background: #fff9f0; padding: 15px; border-radius: 8px; border: 1px solid #ccc; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);'">
               
-              <div v-if="usuarioAtual === nome" style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px;">
-                <button @click="editarKit(kit)" style="background: transparent; border: none; color: #2e7d32; cursor: pointer; font-size: 1rem;" title="Editar meta e nome do pedido">✏️</button>
+              <div v-if="usuarioAtual === nome" style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 2;">
+                <button v-if="kit.isKit !== false" @click="editarKit(kit)" style="background: transparent; border: none; color: #2e7d32; cursor: pointer; font-size: 1rem;" title="Editar meta e nome do pedido">✏️</button>
                 <button @click="deletarPresente(kit._id)" style="background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 1.1rem;" title="Remover pedido completo">✖</button>
               </div>
 
-              <h4 style="margin: 0 0 10px 0; color: #333333; font-size: 1.2rem; padding-right: 50px;">{{ kit.nomeKit }}</h4>
+              <h4 v-if="kit.isKit !== false" style="margin: 0 0 10px 0; color: #333333; font-size: 1.2rem; padding-right: 50px;">{{ kit.nomeKit }}</h4>
               
               <!-- Total -->
-              <div style="margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+              <div v-if="kit.isKit !== false" style="margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
                 <div style="font-size: 1.1rem; color: #333333; font-weight: bold;">
                   <span>Valor Total do Pedido:</span>
                   <span style="color: #2e7d32; margin-left: 10px;">R$ {{ calcularSomaKit(kit).toFixed(2).replace('.', ',') }}</span>
@@ -45,16 +45,17 @@
 
               <!-- Itens -->
               <div style="display: flex; flex-direction: column; gap: 10px;">
-                <div v-for="(item, idx) in kit.itens" :key="idx" style="background: #fff9f0; padding: 10px; border-radius: 5px; border: 1px solid #ccc; position: relative;">
-                   <button v-if="usuarioAtual === nome" @click="deletarSubItem(kit, idx)" style="position: absolute; top: 5px; right: 5px; background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 0.9rem;" title="Remover item">✖</button>
-                   <p style="margin: 0; font-weight: bold; color: #333333; padding-right: 20px;">{{ item.item }}</p>
+                <div v-for="(item, idx) in kit.itens" :key="idx" :style="kit.isKit !== false ? 'background: #fff9f0; padding: 10px; border-radius: 5px; border: 1px solid #ccc; position: relative;' : 'position: relative; padding-right: 30px;'">
+                   <button v-if="usuarioAtual === nome && kit.isKit !== false" @click="deletarSubItem(kit, idx)" style="position: absolute; top: 5px; right: 5px; background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 0.9rem;" title="Remover item">✖</button>
+                   <p style="margin: 0; font-weight: bold; color: #333333;">{{ item.item }}</p>
                    <p v-if="item.valor" style="margin: 5px 0 0 0; font-size: 0.95rem; color: #2e7d32; font-weight: bold;">💰 R$ {{ item.valor.toFixed(2).replace('.', ',') }}</p>
                    <p v-if="item.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #333333;">📝 {{ item.tamanhoEspecificacao }}</p>
                    <a v-if="item.linkLoja" :href="item.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #8b0000; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #8b0000;">🛒 Ver na Loja</a>
                 </div>
               </div>
 
-              <button v-if="usuarioAtual === nome" @click="adicionarSubItem(kit)" style="margin-top: 15px; background: transparent; color: #2e7d32; border: 2px dashed #2e7d32; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">➕ Adicionar item ao pacote</button>
+              <button v-if="usuarioAtual === nome && kit.isKit !== false" @click="adicionarSubItem(kit)" style="margin-top: 15px; background: transparent; color: #2e7d32; border: 2px dashed #2e7d32; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">➕ Adicionar item ao pacote</button>
+
             </div>
           </div>
         </div>
@@ -273,6 +274,7 @@ const adicionarPresente = async (isKit = false) => {
       const payload = {
         nomeFamiliar: props.usuarioAtual,
         nomeKit: finalResult.nomeKit,
+        isKit: isKit,
         itens: finalResult.finalItens
       };
       await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
