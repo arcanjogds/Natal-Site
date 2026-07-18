@@ -55,7 +55,10 @@
               <tr v-for="p in adminParticipants" :key="p.name">
                 <td style="padding: 10px; border: 1px solid #ccc;">{{ p.name }}</td>
                 <td style="padding: 10px; border: 1px solid #ccc; font-family: monospace;">{{ p.password }}</td>
-                <td style="padding: 10px; border: 1px solid #ccc;">{{ p.passwordChanged ? '✅ Sim' : '❌ Não' }}</td>
+                <td style="padding: 10px; border: 1px solid #ccc;">
+                  {{ p.passwordChanged ? '✅ Sim' : '❌ Não' }}
+                  <button @click="adminAlterarSenha(p.name)" style="margin-left: 10px; background: #2196f3; color: white; border: none; border-radius: 3px; padding: 4px 8px; cursor: pointer; font-size: 0.8rem;">Alterar</button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -100,7 +103,7 @@
       <div style="position: absolute; top: 15px; right: 20px;">
         <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: flex-end;">
           <span style="font-size: 0.9rem; font-weight: bold; color: #1565c0;">👤 {{ nomeSalvo }}</span>
-          <button @click="abrirPerfil" style="background: transparent; border: none; font-size: 0.8rem; color: #2196F3; cursor: pointer; text-decoration: underline; padding: 0;">⚙️ Perfil</button>
+          <button @click="abrirPerfil" style="background: transparent; border: none; font-size: 0.8rem; color: #2196F3; cursor: pointer; text-decoration: underline; padding: 0;">⚙️ Alterar Senha</button>
           <button @click="trocarUsuario" style="background: transparent; border: none; font-size: 0.8rem; color: #f44336; cursor: pointer; text-decoration: underline; padding: 0;">Sair</button>
           <button v-if="nomeSalvo === 'Guilherme'" @click="openAdmin" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 0;" title="Acesso Admin">🔒</button>
         </div>
@@ -375,6 +378,34 @@ const carregarDadosAdmin = async () => {
 
   } catch(e) {
     console.error(e);
+  }
+};
+
+const adminAlterarSenha = async (name) => {
+  const { value: newPassword } = await Swal.fire({
+    title: `Alterar senha de ${name}`,
+    input: 'password',
+    inputPlaceholder: 'Nova Senha',
+    showCancelButton: true
+  });
+  
+  if (newPassword) {
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPass.value, name, newPassword })
+      });
+      if (res.ok) {
+        Swal.fire('Sucesso', 'Senha alterada.', 'success');
+        await carregarDadosAdmin();
+      } else {
+        const data = await res.json();
+        Swal.fire('Erro', data.error, 'error');
+      }
+    } catch(e) {
+      Swal.fire('Erro', 'Erro ao alterar.', 'error');
+    }
   }
 };
 
