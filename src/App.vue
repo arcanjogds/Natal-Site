@@ -30,7 +30,7 @@
   <!-- TELA DO ADMINISTRADOR (Isolada) -->
   <div v-else-if="isAdmin" style="background: transparent; min-height: 100vh; padding: 2rem 1rem; display: flex; justify-content: center; align-items: flex-start; position: relative; z-index: 1;">
     <div class="card-natalino" style="padding: 2rem; width: 100%; max-width: 800px;">
-        <h3 style="color: #333333; margin-top: 0; font-size: 1.8rem; text-align: center;">⚙️ Painel do Administrador</h3>
+        <h3 style="color: #e8f5e9; margin-top: 0; font-size: 1.8rem; text-align: center;">⚙️ Painel do Administrador</h3>
         
         <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
           <a href="?adminTab=sorteio" @click.prevent="adminTab = 'sorteio'" :style="adminTab === 'sorteio' ? activeStyle : inactiveStyle" style="text-decoration: none; display: inline-block; text-align: center;">Sorteio</a>
