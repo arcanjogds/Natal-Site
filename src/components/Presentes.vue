@@ -25,16 +25,39 @@
           <div v-if="getPresentes(nome).length === 0" style="color: #999; font-size: 0.9rem; font-style: italic; text-align: center; margin-top: 10px;">
             Ainda não pediu nada.
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-            <div v-for="presente in getPresentes(nome)" :key="presente._id" style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e5c09e; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-              <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 8px;">
-                <button @click="editarPresente(presente)" style="background: transparent; border: none; color: #2e7d32; cursor: pointer; font-size: 1rem;" title="Editar pedido">✏️</button>
-                <button @click="deletarPresente(presente._id)" style="background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 1.1rem;" title="Remover pedido">✖</button>
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div v-for="kit in getPresentes(nome)" :key="kit._id" style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e5c09e; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+              
+              <div v-if="usuarioAtual === nome" style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px;">
+                <button @click="editarKit(kit)" style="background: transparent; border: none; color: #2e7d32; cursor: pointer; font-size: 1rem;" title="Editar meta e nome do pedido">✏️</button>
+                <button @click="deletarPresente(kit._id)" style="background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 1.1rem;" title="Remover pedido completo">✖</button>
               </div>
-              <p style="margin: 0; font-weight: bold; color: #333; padding-right: 45px;">{{ presente.item }}</p>
-              <p v-if="presente.valor" style="margin: 5px 0 0 0; font-size: 0.95rem; color: #4CAF50; font-weight: bold;">💰 {{ presente.valor }}</p>
-              <p v-if="presente.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">📝 {{ presente.tamanhoEspecificacao }}</p>
-              <a v-if="presente.linkLoja" :href="presente.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #c62828; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #c62828;">🛒 Ver na Loja</a>
+
+              <h4 style="margin: 0 0 10px 0; color: #8b0000; font-size: 1.2rem; padding-right: 50px;">{{ kit.nomeKit }}</h4>
+              
+              <!-- Barra de Progresso -->
+              <div style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #333; margin-bottom: 5px; font-weight: bold;">
+                  <span>Total: R$ {{ calcularSomaKit(kit).toFixed(2).replace('.', ',') }}</span>
+                  <span>Meta: R$ {{ (kit.meta || 150).toFixed(2).replace('.', ',') }}</span>
+                </div>
+                <div style="width: 100%; background-color: #e0e0e0; border-radius: 10px; overflow: hidden; height: 12px;">
+                  <div :style="{ width: Math.min((calcularSomaKit(kit) / (kit.meta || 150)) * 100, 100) + '%', backgroundColor: calcularSomaKit(kit) >= (kit.meta || 150) ? '#4CAF50' : '#ff9800', height: '100%', transition: 'width 0.3s' }"></div>
+                </div>
+              </div>
+
+              <!-- Itens -->
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div v-for="(item, idx) in kit.itens" :key="idx" style="background: #fff9f0; padding: 10px; border-radius: 5px; border: 1px solid #ccc; position: relative;">
+                   <button v-if="usuarioAtual === nome" @click="deletarSubItem(kit, idx)" style="position: absolute; top: 5px; right: 5px; background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 0.9rem;" title="Remover item">✖</button>
+                   <p style="margin: 0; font-weight: bold; color: #333; padding-right: 20px;">{{ item.item }}</p>
+                   <p v-if="item.valor" style="margin: 5px 0 0 0; font-size: 0.95rem; color: #2e7d32; font-weight: bold;">💰 R$ {{ item.valor.toFixed(2).replace('.', ',') }}</p>
+                   <p v-if="item.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #333;">📝 {{ item.tamanhoEspecificacao }}</p>
+                   <a v-if="item.linkLoja" :href="item.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #8b0000; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #8b0000;">🛒 Ver na Loja</a>
+                </div>
+              </div>
+
+              <button v-if="usuarioAtual === nome" @click="adicionarSubItem(kit)" style="margin-top: 15px; background: transparent; color: #2e7d32; border: 2px dashed #2e7d32; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">➕ Adicionar item ao pacote</button>
             </div>
           </div>
         </div>
@@ -47,7 +70,7 @@
     <div class="fab-container">
       <button @click="adicionarPresente" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
         <span style="font-size: 1.2rem;">➕</span>
-        <span class="fab-text">Adicionar Pedido</span>
+        <span class="fab-text">Criar Novo Pedido</span>
       </button>
     </div>
   </teleport>
@@ -85,8 +108,15 @@ const nomesFiltrados = computed(() => {
   return nomesFamilia.value;
 });
 
+const calcularSomaKit = (kit) => {
+  if (!kit || !kit.itens) return 0;
+  return kit.itens.reduce((acc, curr) => acc + (curr.valor || 0), 0);
+};
+
 const getPresentes = (nome) => {
-  return presentes.value.filter(p => p.nomeFamiliar === nome);
+  const pedidos = presentes.value.filter(p => p.nomeFamiliar === nome);
+  // Ordena pelo valor total dos itens (crescente)
+  return pedidos.sort((a, b) => calcularSomaKit(a) - calcularSomaKit(b));
 };
 
 const fetchPresentes = async () => {
@@ -97,138 +127,127 @@ const fetchPresentes = async () => {
 };
 onMounted(() => fetchPresentes());
 
-// FORMULÁRIO ARRUMADO SEM PRECISAR ESCOLHER NOME
 const adicionarPresente = async () => {
   if (!props.usuarioAtual) {
-    Swal.fire('Identifique-se!', 'Por favor, selecione quem é você no canto superior direito da página antes de adicionar um pedido.', 'warning');
+    Swal.fire('Identifique-se!', 'Por favor, selecione quem é você no canto superior direito da página antes de criar um pedido.', 'warning');
     return;
   }
 
   const { value: formValues } = await Swal.fire({
-    title: 'Sua lista de desejos',
+    title: 'Criar Novo Pedido / Kit',
     html: `
       <div style="text-align: left;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Presente:</label>
-        <input id="swal-item" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" placeholder="Ex: Perfume Boticário">
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Nome do Pedido (Ex: Kit Verão):</label>
+        <input id="swal-nome-kit" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Opcional">
+        
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Meta de Valor Total (R$):</label>
+        <input id="swal-meta" type="number" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="150">
 
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Valor:</label>
-        <input id="swal-valor" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" placeholder="Ex: R$ 150,00">
+        <hr style="margin: 15px 0;">
+        <h4 style="margin: 0 0 10px 0; color: #333;">Primeiro Item do Pedido</h4>
+
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Item:</label>
+        <input id="swal-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Ex: Perfume">
+
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Valor do Item (R$):</label>
+        <input id="swal-valor" type="number" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Ex: 50">
 
         <label style="font-weight: bold; font-size: 14px; color: #333;">Descrição:</label>
-        <input id="swal-espec" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" placeholder="Ex: 220v, Tam M">
+        <input id="swal-espec" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
 
         <label style="font-weight: bold; font-size: 14px; color: #333;">Link da loja (Opcional):</label>
-        <input id="swal-link" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 10px 0; box-sizing: border-box;" placeholder="Cole o link aqui...">
+        <input id="swal-link" class="swal2-input" style="width: 100%; box-sizing: border-box;">
       </div>
     `,
-    focusConfirm: false,
     showCancelButton: true,
-    confirmButtonColor: '#2196f3',
-    confirmButtonText: 'Salvar Pedido',
-    cancelButtonText: 'Cancelar',
-    didOpen: () => {
-      const valorInput = document.getElementById('swal-valor');
-      if (valorInput.value === '') valorInput.value = 'R$ ';
-      valorInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, "");
-        if (!value) {
-            e.target.value = "R$ ";
-            return;
-        }
-        value = (parseInt(value, 10) / 100).toFixed(2) + '';
-        value = value.replace(".", ",");
-        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-        e.target.value = "R$ " + value;
-      });
-    },
+    confirmButtonText: 'Criar Pedido',
     preConfirm: () => {
-      const nomeFamiliar = props.usuarioAtual;
+      const nomeKit = document.getElementById('swal-nome-kit').value || 'Pedido de Presente';
+      const meta = parseFloat(document.getElementById('swal-meta').value) || 150;
+      
       const item = document.getElementById('swal-item').value;
-      const valor = document.getElementById('swal-valor').value;
+      const valor = parseFloat(document.getElementById('swal-valor').value) || 0;
       const tamanhoEspecificacao = document.getElementById('swal-espec').value;
       let linkLoja = document.getElementById('swal-link').value;
       
       if (!item) {
-        Swal.showValidationMessage('O item é obrigatório!');
-        return false;
-      }
-      const numValor = parseFloat(valor.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
-      if (isNaN(numValor) || numValor < 150) {
-        Swal.showValidationMessage('O valor mínimo é R$ 150,00!');
+        Swal.showValidationMessage('Adicione pelo menos 1 item para criar o pedido!');
         return false;
       }
       if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
-      return { nomeFamiliar, item, valor, tamanhoEspecificacao, linkLoja };
+      
+      return { 
+        nomeFamiliar: props.usuarioAtual, 
+        nomeKit, 
+        meta,
+        itens: [{ item, valor, tamanhoEspecificacao, linkLoja }] 
+      };
     }
   });
 
   if (formValues) {
     try {
       await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formValues) });
-      Swal.fire('Pronto!', 'Seu pedido já está na vitrine!', 'success');
+      Swal.fire('Pronto!', 'Pedido criado!', 'success');
       fetchPresentes();
     } catch (error) { Swal.fire('Erro', 'Falha ao conectar.', 'error'); }
   }
 };
 
-const deletarPresente = async (id) => {
-  const confirm = await Swal.fire({ title: 'Apagar pedido?', text: "Remover este item?", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sim, apagar!' });
-  if (confirm.isConfirmed) {
-    try { await fetch(`${apiUrl}/${id}`, { method: 'DELETE' }); fetchPresentes(); } 
-    catch (error) { Swal.fire('Erro', 'Não foi possível apagar.', 'error'); }
+const editarKit = async (kit) => {
+  const { value: formValues } = await Swal.fire({
+    title: 'Editar Pedido Principal',
+    html: `
+      <div style="text-align: left;">
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Nome do Pedido (Ex: Kit Verão):</label>
+        <input id="swal-edit-nome" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="${kit.nomeKit}">
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Meta de Valor (R$):</label>
+        <input id="swal-edit-meta" type="number" class="swal2-input" style="width: 100%; box-sizing: border-box;" value="${kit.meta || 150}">
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Salvar',
+    preConfirm: () => {
+      const nomeKit = document.getElementById('swal-edit-nome').value || 'Pedido de Presente';
+      const meta = parseFloat(document.getElementById('swal-edit-meta').value) || 150;
+      return { nomeKit, meta };
+    }
+  });
+
+  if (formValues) {
+    try {
+      await fetch(`${apiUrl}/${kit._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formValues) });
+      Swal.fire('Atualizado!', 'Pedido modificado.', 'success');
+      fetchPresentes();
+    } catch (e) { Swal.fire('Erro', 'Falha ao conectar.', 'error'); }
   }
 };
 
-const editarPresente = async (presente) => {
+const adicionarSubItem = async (kit) => {
   const { value: formValues } = await Swal.fire({
-    title: 'Editar Pedido',
+    title: 'Adicionar Item',
     html: `
       <div style="text-align: left;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Presente:</label>
-        <input id="swal-edit-item" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" value="${presente.item}">
-
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Valor:</label>
-        <input id="swal-edit-valor" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" value="${presente.valor || ''}">
-
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Descrição:</label>
-        <input id="swal-edit-espec" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 15px 0; box-sizing: border-box;" value="${presente.tamanhoEspecificacao || ''}">
-
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Link da loja (Opcional):</label>
-        <input id="swal-edit-link" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0 10px 0; box-sizing: border-box;" value="${presente.linkLoja || ''}">
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Item:</label>
+        <input id="swal-sub-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Valor (R$):</label>
+        <input id="swal-sub-valor" type="number" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Descrição (Opcional):</label>
+        <input id="swal-sub-desc" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+        <label style="font-weight: bold; font-size: 14px; color: #333;">Link (Opcional):</label>
+        <input id="swal-sub-link" class="swal2-input" style="width: 100%; box-sizing: border-box;">
       </div>
     `,
-    focusConfirm: false,
     showCancelButton: true,
-    confirmButtonColor: '#2196f3',
-    confirmButtonText: 'Salvar',
-    didOpen: () => {
-      const valorInput = document.getElementById('swal-edit-valor');
-      if (valorInput.value === '') valorInput.value = 'R$ ';
-      valorInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, "");
-        if (!value) {
-            e.target.value = "R$ ";
-            return;
-        }
-        value = (parseInt(value, 10) / 100).toFixed(2) + '';
-        value = value.replace(".", ",");
-        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-        e.target.value = "R$ " + value;
-      });
-    },
+    confirmButtonText: 'Adicionar',
     preConfirm: () => {
-      const item = document.getElementById('swal-edit-item').value;
-      const valor = document.getElementById('swal-edit-valor').value;
-      const tamanhoEspecificacao = document.getElementById('swal-edit-espec').value;
-      let linkLoja = document.getElementById('swal-edit-link').value;
+      const item = document.getElementById('swal-sub-item').value;
+      const valor = parseFloat(document.getElementById('swal-sub-valor').value) || 0;
+      const tamanhoEspecificacao = document.getElementById('swal-sub-desc').value;
+      let linkLoja = document.getElementById('swal-sub-link').value;
       
       if (!item) {
-        Swal.showValidationMessage('O item é obrigatório!');
-        return false;
-      }
-      const numValor = parseFloat(valor.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
-      if (isNaN(numValor) || numValor < 150) {
-        Swal.showValidationMessage('O valor mínimo é R$ 150,00!');
+        Swal.showValidationMessage('O nome do item é obrigatório!');
         return false;
       }
       if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
@@ -238,10 +257,29 @@ const editarPresente = async (presente) => {
 
   if (formValues) {
     try {
-      await fetch(`${apiUrl}/${presente._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formValues) });
-      Swal.fire('Atualizado!', 'Pedido modificado com sucesso.', 'success');
+      const novosItens = [...(kit.itens || []), formValues];
+      await fetch(`${apiUrl}/${kit._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ itens: novosItens }) });
       fetchPresentes();
-    } catch (error) { Swal.fire('Erro', 'Falha ao conectar.', 'error'); }
+    } catch (e) { Swal.fire('Erro', 'Falha ao salvar.', 'error'); }
+  }
+};
+
+const deletarSubItem = async (kit, idx) => {
+  const confirm = await Swal.fire({ title: 'Apagar item?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sim' });
+  if (confirm.isConfirmed) {
+    try {
+      const novosItens = kit.itens.filter((_, i) => i !== idx);
+      await fetch(`${apiUrl}/${kit._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ itens: novosItens }) });
+      fetchPresentes();
+    } catch (e) { Swal.fire('Erro', 'Falha ao apagar.', 'error'); }
+  }
+};
+
+const deletarPresente = async (id) => {
+  const confirm = await Swal.fire({ title: 'Apagar pedido inteiro?', text: "Isso removerá todos os itens deste kit.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sim, apagar!' });
+  if (confirm.isConfirmed) {
+    try { await fetch(`${apiUrl}/${id}`, { method: 'DELETE' }); fetchPresentes(); } 
+    catch (error) { Swal.fire('Erro', 'Não foi possível apagar.', 'error'); }
   }
 };
 </script>

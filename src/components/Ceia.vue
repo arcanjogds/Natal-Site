@@ -35,16 +35,16 @@
       </div>
 
       <!-- Linha Inferior: Botão Eu Levo ou Responsável + Desistir -->
-      <div style="display: flex; align-items: center; justify-content: flex-end; width: 100%; border-top: 1px dashed #eee; padding-top: 10px;">
-        <div v-if="prato.responsavel" style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px; flex-wrap: wrap;">
+      <div style="width: 100%; border-top: 1px dashed #eee; padding-top: 10px;">
+        <div v-for="resp in prato.responsaveis" :key="resp.nome" style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
           <span style="background: #e8f5e9; color: #2e7d32; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; border: 1px solid #c8e6c9;">
-            ✅ {{ prato.responsavel }} vai levar
+            ✅ {{ resp.nome }} vai levar {{ resp.quantidade }}x
           </span>
-          <button @click="desistirPrato(prato._id, prato.nomePrato)" style="background: transparent; border: 1px solid #f44336; color: #f44336; padding: 6px 12px; border-radius: 5px; font-size: 0.85rem; font-weight: bold; cursor: pointer; white-space: nowrap;">
+          <button v-if="usuarioAtual === resp.nome" @click="desistirPrato(prato, resp.nome)" style="background: transparent; border: 1px solid #f44336; color: #f44336; padding: 6px 12px; border-radius: 5px; font-size: 0.85rem; font-weight: bold; cursor: pointer; white-space: nowrap;">
             Desistir
           </button>
         </div>
-        <button v-else @click="assumirPrato(prato._id, prato.nomePrato)" style="background: #2e7d32; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%;">
+        <button @click="assumirPrato(prato)" style="background: #2e7d32; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px;">
           🙋 Eu levo!
         </button>
       </div>
@@ -95,9 +95,9 @@ const pratosFiltrados = computed(() => {
       return false;
     }
     if (filtroResponsavel.value === 'Sem Ninguém') {
-      if (prato.responsavel !== '') return false;
+      if (prato.responsaveis && prato.responsaveis.length > 0) return false;
     } else if (filtroResponsavel.value !== 'Todos') {
-      if (prato.responsavel !== filtroResponsavel.value) return false;
+      if (!prato.responsaveis || !prato.responsaveis.some(r => r.nome === filtroResponsavel.value)) return false;
     }
     return true;
   });
@@ -112,27 +112,50 @@ const fetchPratos = async () => {
 onMounted(() => fetchPratos());
 
 // FORMULÁRIO PARA ASSUMIR UM PRATO
-const assumirPrato = async (id, nomePrato) => {
+const assumirPrato = async (prato) => {
   if (!props.usuarioAtual) {
     Swal.fire('Identifique-se!', 'Por favor, selecione quem é você no canto superior direito da página antes de assumir um prato.', 'warning');
     return;
   }
+  
+  if (prato.responsaveis && prato.responsaveis.some(r => r.nome === props.usuarioAtual)) {
+    Swal.fire('Opa!', 'Você já assumiu este prato. Se quiser mudar a quantidade, desista e assuma novamente.', 'info');
+    return;
+  }
 
-  const confirm = await Swal.fire({
+  const { value: formValues } = await Swal.fire({
     title: 'Confirmar Responsabilidade',
-    text: `Você (${props.usuarioAtual}) vai levar: ${nomePrato}?`,
+    html: `
+      <p style="font-size: 1.1rem; color: #333;">Você (${props.usuarioAtual}) vai levar: <strong>${prato.nomePrato}</strong></p>
+      <label style="font-weight: bold; font-size: 14px; color: #333; margin-top: 15px; display: block; text-align: left;">Quantidade (ex: 2 refrigerantes, 1 travessa):</label>
+      <input id="swal-qtd" type="number" min="1" class="swal2-input" style="width: 100%; max-width: 100%; margin: 5px 0; box-sizing: border-box;" value="1">
+    `,
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#ff9800',
     cancelButtonColor: '#d33',
     confirmButtonText: 'Sim, eu levo!',
-    cancelButtonText: 'Cancelar'
+    cancelButtonText: 'Cancelar',
+    preConfirm: () => {
+      const qtd = document.getElementById('swal-qtd').value;
+      if (!qtd || qtd < 1) {
+        Swal.showValidationMessage('A quantidade deve ser pelo menos 1!');
+      }
+      return qtd;
+    }
   });
 
-  if (confirm.isConfirmed) {
+  if (formValues) {
     try {
-      await fetch(`${apiUrl}/${id}/assumir`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ responsavel: props.usuarioAtual }) });
-      Swal.fire('Aí sim!', `${nomePrato} está garantido por ${props.usuarioAtual}!`, 'success');
+      const novosResponsaveis = prato.responsaveis ? [...prato.responsaveis] : [];
+      novosResponsaveis.push({ nome: props.usuarioAtual, quantidade: parseInt(formValues) });
+      
+      await fetch(`${apiUrl}/${prato._id}/assumir`, { 
+          method: 'PUT', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ responsaveis: novosResponsaveis }) 
+      });
+      Swal.fire('Aí sim!', `${prato.nomePrato} está garantido por ${props.usuarioAtual}!`, 'success');
       fetchPratos();
     } catch (error) { Swal.fire('Erro', 'Não foi possível salvar.', 'error'); }
   }
@@ -223,12 +246,18 @@ const deletarPrato = async (id) => {
   }
 };
 
-const desistirPrato = async (id, nomePrato) => {
-  const confirm = await Swal.fire({ title: 'Desistir?', text: `Deixar de levar o ${nomePrato}?`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#ff9800', confirmButtonText: 'Sim, desistir' });
+const desistirPrato = async (prato, nomeDesistente) => {
+  const confirm = await Swal.fire({ title: 'Desistir?', text: `Deixar de levar o ${prato.nomePrato}?`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#ff9800', confirmButtonText: 'Sim, desistir' });
   if (confirm.isConfirmed) {
     try {
-      await fetch(`${apiUrl}/${id}/assumir`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ responsavel: '' }) });
-      Swal.fire('Pronto', `O ${nomePrato} está livre novamente.`, 'success');
+      const novosResponsaveis = prato.responsaveis.filter(r => r.nome !== nomeDesistente);
+      
+      await fetch(`${apiUrl}/${prato._id}/assumir`, { 
+          method: 'PUT', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ responsaveis: novosResponsaveis }) 
+      });
+      Swal.fire('Pronto', `Você desistiu de ${prato.nomePrato}.`, 'success');
       fetchPratos();
     } catch (e) { Swal.fire('Erro', 'Não foi possível atualizar.', 'error'); }
   }
