@@ -125,11 +125,10 @@
           <button @click="mostrarAmigoSorteadoCache" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #1976D2; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
         </div>
 
-        <div v-else-if="!revealedName">
-          <div>
-            <p style="font-size: 1.2rem; color: #555;">Você está participando como <b>{{ nomeSalvo }}</b>.</p>
-            <button @click="revealSecretSanta" style="padding: 15px; font-size: 18px; cursor: pointer; background: #4CAF50; font-weight: bold; color: white; border: none; border-radius: 8px; width: 100%; margin-top: 15px;">Revelar meu Amigo Secreto</button>
-          </div>
+        <div v-else-if="!revealedName" style="text-align: center; padding: 20px 0;">
+          <button @click="revealSecretSanta" class="btn-reveal">
+            🎁 Revelar meu Amigo Secreto 🎁
+          </button>
         </div>
 
         <div v-if="revealedName">
@@ -161,14 +160,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import Swal from 'sweetalert2';
 import Ceia from './components/Ceia.vue';
 import Presentes from './components/Presentes.vue';
 
 const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : 'https://natal-bl3x.onrender.com';
 
-const activeTab = ref('sorteio');
+const activeTab = ref(localStorage.getItem('activeTab') || 'sorteio');
+
+watch(activeTab, (newTab) => {
+  localStorage.setItem('activeTab', newTab);
+});
 
 const activeStyle = 'background: #c62828; color: white; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s;';
 const inactiveStyle = 'background: #e0e0e0; color: #333; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s;';
@@ -198,6 +201,20 @@ const fetchParticipants = async () => {
   try {
     const res = await fetch(`${BASE_URL}/api/participants`);
     participants.value = await res.json();
+    
+    if (nomeSalvo.value) {
+      const me = participants.value.find(p => p.name === nomeSalvo.value);
+      if (me && !me.hasSeen && amigoSorteadoCache.value) {
+        amigoSorteadoCache.value = '';
+        revealedName.value = '';
+        const storedUser = localStorage.getItem('loggedInUser');
+        if (storedUser) {
+          const userObj = JSON.parse(storedUser);
+          userObj.drawnName = '';
+          localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+        }
+      }
+    }
   } catch (error) {
     console.error("Erro ao buscar participantes:", error);
   }
@@ -443,3 +460,30 @@ const deletarTodaCeia = async () => {
   await carregarDadosAdmin();
 };
 </script>
+
+<style>
+.btn-reveal {
+  padding: 18px 30px;
+  font-size: 22px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  width: 100%;
+  max-width: 400px;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: pulse 2s infinite;
+}
+.btn-reveal:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(76, 175, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+</style>
