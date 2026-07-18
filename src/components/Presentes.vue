@@ -62,12 +62,16 @@
     </div>
   </div>
 
-  <!-- BOTAO FLUTUANTE (FAB) -->
+  <!-- BOTOES FLUTUANTES (FAB) -->
   <teleport to="body">
-    <div class="fab-container">
-      <button @click="adicionarPresente" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
-        <span style="font-size: 1.2rem;">➕</span>
-        <span class="fab-text">Criar Novo Pedido</span>
+    <div class="fab-container" style="display: flex; flex-direction: column; gap: 12px; align-items: flex-end;">
+      <button @click="adicionarPresente(false)" class="fab-btn" style="background: #2196f3; color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+        <span style="font-size: 1.2rem;">🎁</span>
+        <span class="fab-text">Pedido Individual</span>
+      </button>
+      <button @click="adicionarPresente(true)" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+        <span style="font-size: 1.2rem;">🛍️</span>
+        <span class="fab-text">Criar um Kit</span>
       </button>
     </div>
   </teleport>
@@ -134,7 +138,7 @@ window.formatarMoeda = function(input) {
   input.value = "R$ " + valor;
 };
 
-const adicionarPresente = async () => {
+const adicionarPresente = async (isKit = false) => {
   if (!props.usuarioAtual) {
     Swal.fire('Identifique-se!', 'Por favor, selecione quem é você no canto superior direito da página antes de criar um pedido.', 'warning');
     return;
@@ -155,35 +159,64 @@ const adicionarPresente = async () => {
       itensHtml += '</ul></div>';
     }
 
+    let titulo = isKit ? 'Criar Kit de Pedidos' : 'Adicionar Pedido Individual';
+    
+    let htmlForm = '<div style="text-align: left;">';
+    
+    if (isKit && itensDoPedido.length === 0) {
+      htmlForm += `
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Nome do Kit (Ex: Kit Praia):</label>
+        <input id="swal-nome-kit" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Opcional" value="${nomeKitCache}">
+        <hr style="margin: 15px 0;">
+      `;
+    } else if (isKit) {
+       htmlForm += `<input type="hidden" id="swal-nome-kit" value="${nomeKitCache}">`;
+    }
+    
+    htmlForm += itensHtml;
+
+    if (isKit && itensDoPedido.length > 0) {
+        htmlForm += `<h4 style="margin: 0 0 10px 0; color: #333333;">Adicionar mais um item ao kit</h4>`;
+    }
+
+    htmlForm += `
+      <label style="font-weight: bold; font-size: 14px; color: #333333;">Item:</label>
+      <input id="swal-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Ex: Perfume">
+
+      <label style="font-weight: bold; font-size: 14px; color: #333333;">Valor do Item (R$):</label>
+      <input id="swal-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="R$ 0,00">
+
+      <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
+      <input id="swal-espec" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+
+      <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja:</label>
+      <input id="swal-link" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+    `;
+    
+    if (isKit) {
+      htmlForm += `
+        <button id="btn-add-mais" type="button" style="background: transparent; border: 2px dashed #2e7d32; color: #2e7d32; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold;">➕ Adicionar mais um item a este kit</button>
+      `;
+    }
+    
+    htmlForm += '</div>';
+
     const res = await Swal.fire({
-      title: 'Adicionar Item',
-      html: `
-        <div style="text-align: left;">
-          ${itensHtml}
-
-          <label style="font-weight: bold; font-size: 14px; color: #333333;">Item:</label>
-          <input id="swal-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Ex: Perfume">
-
-          <label style="font-weight: bold; font-size: 14px; color: #333333;">Valor do Item (R$):</label>
-          <input id="swal-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="R$ 0,00">
-
-          <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
-          <input id="swal-espec" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
-
-          <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja:</label>
-          <input id="swal-link" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
-          
-          <button id="btn-add-mais" type="button" style="background: transparent; border: 2px dashed #2196f3; color: #2196f3; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold;">➕ Adicionar mais um item e formar um kit</button>
-        </div>
-      `,
+      title: titulo,
+      html: htmlForm,
       showCancelButton: true,
       confirmButtonText: 'Salvar Pedido',
       cancelButtonText: 'Cancelar',
       didOpen: () => {
-        document.getElementById('btn-add-mais').addEventListener('click', () => {
-          window._addMaisClicked = true;
-          Swal.clickConfirm();
-        });
+        if (isKit) {
+          const btnAdd = document.getElementById('btn-add-mais');
+          if (btnAdd) {
+            btnAdd.addEventListener('click', () => {
+              window._addMaisClicked = true;
+              Swal.clickConfirm();
+            });
+          }
+        }
       },
       preConfirm: () => {
         const isAddMais = window._addMaisClicked;
@@ -200,7 +233,7 @@ const adicionarPresente = async () => {
         const tamanhoEspecificacao = document.getElementById('swal-espec').value;
         let linkLoja = document.getElementById('swal-link').value;
         
-        if (isAddMais) {
+        if (isKit && isAddMais) {
           if (!item) {
              Swal.showValidationMessage('Preencha o nome do item antes de adicionar!');
              return false;

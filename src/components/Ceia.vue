@@ -1,7 +1,7 @@
 <template>
   <div class="card-natalino" style="padding: 20px; margin-top: 20px; text-align: center;">
-    <h2 style="color: #33691e; margin-top: 0;">🍽️ Cardápio da Ceia</h2>
-    <p style="color: #558b2f; margin-bottom: 20px; font-size: 1.1rem;">Escolha o que você vai levar para a nossa ceia!</p>
+    <h2 style="color: #ffffff; margin-top: 0;">🍽️ Cardápio da Ceia</h2>
+    <p style="color: #ffffff; margin-bottom: 20px; font-size: 1.1rem;">Escolha o que você vai levar para a nossa ceia!</p>
 
     <!-- ÁREA DE FILTROS -->
     <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
