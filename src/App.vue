@@ -53,7 +53,10 @@
             <tbody>
               <tr v-for="p in sortedAdminParticipantsSorteio" :key="p._id">
                 <td style="padding: 10px; border: 1px solid #ccc;">
-                  <span v-if="p.isActive" style="color: #2e7d32; font-weight: bold;">{{ p.name }}</span>
+                  <span v-if="p.isActive" style="color: #2e7d32; font-weight: bold;">
+                    {{ p.name }}
+                    <span v-if="p.hasSeen" title="Já viu quem tirou no sorteio"> 👀</span>
+                  </span>
                   <span v-else style="color: #999; text-decoration: line-through;">{{ p.name }} (Inativo)</span>
                 </td>
                 <td style="padding: 10px; border: 1px solid #ccc; text-align: center; white-space: nowrap;">
@@ -150,8 +153,7 @@
 
       <div v-if="activeTab === 'sorteio'">
 
-
-        <div v-if="amigoSorteadoCache" style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9; margin-top: 20px;">
+        <div v-if="amigoSorteadoCache && !revealedName" style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9; margin-top: 20px;">
           <p style="font-size: 1.2rem; color: #1565c0; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto!</p>
           <button @click="mostrarAmigoSorteadoCache" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #1976D2; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
         </div>
