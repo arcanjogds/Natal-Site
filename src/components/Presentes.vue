@@ -41,13 +41,14 @@
       </div>
     </div>
 
-    <!-- BOTAO FLUTUANTE (FAB) -->
-    <div class="fab-container">
-      <button @click="adicionarPresente" class="fab-btn" style="background: #2196f3; color: white;">
-        <span style="font-size: 1.2rem;">➕</span>
-        <span class="fab-text">Adicionar Pedido</span>
-      </button>
-    </div>
+  </div>
+
+  <!-- BOTAO FLUTUANTE (FAB) -->
+  <div class="fab-container">
+    <button @click="adicionarPresente" class="fab-btn" style="background: #2196f3; color: white;">
+      <span style="font-size: 1.2rem;">➕</span>
+      <span class="fab-text">Adicionar Pedido</span>
+    </button>
   </div>
 </template>
 

@@ -52,13 +52,14 @@
 
     <div v-if="pratosFiltrados.length === 0" style="color: #999; margin: 20px 0;">O cardápio ainda está vazio ou nenhum prato corresponde ao filtro.</div>
 
-    <!-- BOTAO FLUTUANTE (FAB) -->
-    <div class="fab-container">
-      <button @click="adicionarPrato" class="fab-btn" style="background: #8bc34a; color: white;">
-        <span style="font-size: 1.2rem;">➕</span>
-        <span class="fab-text">Adicionar item</span>
-      </button>
-    </div>
+  </div>
+
+  <!-- BOTAO FLUTUANTE (FAB) -->
+  <div class="fab-container">
+    <button @click="adicionarPrato" class="fab-btn" style="background: #8bc34a; color: white;">
+      <span style="font-size: 1.2rem;">➕</span>
+      <span class="fab-text">Adicionar item</span>
+    </button>
   </div>
 </template>
 
