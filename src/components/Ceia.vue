@@ -25,7 +25,7 @@
       <!-- Linha Superior: Nome, Categoria e Controles -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
         <div style="text-align: left;">
-          <strong style="font-size: 1.2rem; color: #2e7d32;">{{ prato.nomePrato }}</strong>
+          <strong style="font-size: 1.2rem; color: #2e7d32;">{{ prato.nomePrato }} <span v-if="calcularTotalPrato(prato) > 0">({{ calcularTotalPrato(prato) }}x)</span></strong>
           <span style="display: block; font-size: 0.85rem; color: #757575; text-transform: uppercase; margin-top: 3px;">{{ prato.categoria }}</span>
         </div>
         <div style="display: flex; gap: 8px;">
@@ -102,6 +102,11 @@ const pratosFiltrados = computed(() => {
     return true;
   });
 });
+
+const calcularTotalPrato = (prato) => {
+  if (!prato.responsaveis) return 0;
+  return prato.responsaveis.reduce((soma, pessoa) => soma + (pessoa.quantidade || 1), 0);
+};
 
 const fetchPratos = async () => {
   try {

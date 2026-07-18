@@ -35,14 +35,11 @@
 
               <h4 style="margin: 0 0 10px 0; color: #8b0000; font-size: 1.2rem; padding-right: 50px;">{{ kit.nomeKit }}</h4>
               
-              <!-- Barra de Progresso -->
-              <div style="margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #333; margin-bottom: 5px; font-weight: bold;">
-                  <span>Total: R$ {{ calcularSomaKit(kit).toFixed(2).replace('.', ',') }}</span>
-                  <span>Meta: R$ {{ (kit.meta || 150).toFixed(2).replace('.', ',') }}</span>
-                </div>
-                <div style="width: 100%; background-color: #e0e0e0; border-radius: 10px; overflow: hidden; height: 12px;">
-                  <div :style="{ width: Math.min((calcularSomaKit(kit) / (kit.meta || 150)) * 100, 100) + '%', backgroundColor: calcularSomaKit(kit) >= (kit.meta || 150) ? '#4CAF50' : '#ff9800', height: '100%', transition: 'width 0.3s' }"></div>
+              <!-- Total -->
+              <div style="margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+                <div style="font-size: 1.1rem; color: #333333; font-weight: bold;">
+                  <span>Valor Total do Pedido:</span>
+                  <span style="color: #2e7d32; margin-left: 10px;">R$ {{ calcularSomaKit(kit).toFixed(2).replace('.', ',') }}</span>
                 </div>
               </div>
 
@@ -50,9 +47,9 @@
               <div style="display: flex; flex-direction: column; gap: 10px;">
                 <div v-for="(item, idx) in kit.itens" :key="idx" style="background: #fff9f0; padding: 10px; border-radius: 5px; border: 1px solid #ccc; position: relative;">
                    <button v-if="usuarioAtual === nome" @click="deletarSubItem(kit, idx)" style="position: absolute; top: 5px; right: 5px; background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 0.9rem;" title="Remover item">✖</button>
-                   <p style="margin: 0; font-weight: bold; color: #333; padding-right: 20px;">{{ item.item }}</p>
+                   <p style="margin: 0; font-weight: bold; color: #333333; padding-right: 20px;">{{ item.item }}</p>
                    <p v-if="item.valor" style="margin: 5px 0 0 0; font-size: 0.95rem; color: #2e7d32; font-weight: bold;">💰 R$ {{ item.valor.toFixed(2).replace('.', ',') }}</p>
-                   <p v-if="item.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #333;">📝 {{ item.tamanhoEspecificacao }}</p>
+                   <p v-if="item.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #333333;">📝 {{ item.tamanhoEspecificacao }}</p>
                    <a v-if="item.linkLoja" :href="item.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #8b0000; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #8b0000;">🛒 Ver na Loja</a>
                 </div>
               </div>
@@ -127,67 +124,127 @@ const fetchPresentes = async () => {
 };
 onMounted(() => fetchPresentes());
 
+// Expor globalmente para o Swal poder acessar no oninput
+window.formatarMoeda = function(input) {
+  let valor = input.value.replace(/\D/g, "");
+  if (!valor) { input.value = ""; return; }
+  valor = (parseInt(valor, 10) / 100).toFixed(2) + "";
+  valor = valor.replace(".", ",");
+  valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+  input.value = "R$ " + valor;
+};
+
 const adicionarPresente = async () => {
   if (!props.usuarioAtual) {
     Swal.fire('Identifique-se!', 'Por favor, selecione quem é você no canto superior direito da página antes de criar um pedido.', 'warning');
     return;
   }
 
-  const { value: formValues } = await Swal.fire({
-    title: 'Criar Novo Pedido / Kit',
-    html: `
-      <div style="text-align: left;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Nome do Pedido (Ex: Kit Verão):</label>
-        <input id="swal-nome-kit" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Opcional">
-        
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Meta de Valor Total (R$):</label>
-        <input id="swal-meta" type="number" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="150">
-
-        <hr style="margin: 15px 0;">
-        <h4 style="margin: 0 0 10px 0; color: #333;">Primeiro Item do Pedido</h4>
-
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Item:</label>
-        <input id="swal-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Ex: Perfume">
-
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Valor do Item (R$):</label>
-        <input id="swal-valor" type="number" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Ex: 50">
-
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Descrição:</label>
-        <input id="swal-espec" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
-
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Link da loja (Opcional):</label>
-        <input id="swal-link" class="swal2-input" style="width: 100%; box-sizing: border-box;">
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: 'Criar Pedido',
-    preConfirm: () => {
-      const nomeKit = document.getElementById('swal-nome-kit').value || 'Pedido de Presente';
-      const meta = parseFloat(document.getElementById('swal-meta').value) || 150;
-      
-      const item = document.getElementById('swal-item').value;
-      const valor = parseFloat(document.getElementById('swal-valor').value) || 0;
-      const tamanhoEspecificacao = document.getElementById('swal-espec').value;
-      let linkLoja = document.getElementById('swal-link').value;
-      
-      if (!item) {
-        Swal.showValidationMessage('Adicione pelo menos 1 item para criar o pedido!');
-        return false;
-      }
-      if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
-      
-      return { 
-        nomeFamiliar: props.usuarioAtual, 
-        nomeKit, 
-        meta,
-        itens: [{ item, valor, tamanhoEspecificacao, linkLoja }] 
-      };
+  let itensDoPedido = [];
+  let nomeKitCache = '';
+  let finalResult = null;
+  
+  while (true) {
+    let itensHtml = '';
+    if (itensDoPedido.length > 0) {
+      itensHtml = '<div style="background: #eee; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; text-align: left;">';
+      itensHtml += '<strong>Itens já adicionados:</strong><ul style="margin: 5px 0 0 15px; padding: 0;">';
+      itensDoPedido.forEach((it) => {
+         itensHtml += `<li style="color: #333333;">${it.item} - R$ ${it.valor.toFixed(2).replace('.', ',')}</li>`;
+      });
+      itensHtml += '</ul></div>';
     }
-  });
 
-  if (formValues) {
+    const res = await Swal.fire({
+      title: 'Criar Novo Pedido / Kit',
+      html: `
+        <div style="text-align: left;">
+          <label style="font-weight: bold; font-size: 14px; color: #333333;">Nome do Pedido (Ex: Kit Praia):</label>
+          <input id="swal-nome-kit" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Opcional" value="${nomeKitCache}">
+          
+          ${itensHtml}
+
+          <hr style="margin: 15px 0;">
+          <h4 style="margin: 0 0 10px 0; color: #333333;">Adicionar Item</h4>
+
+          <label style="font-weight: bold; font-size: 14px; color: #333333;">Item:</label>
+          <input id="swal-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Ex: Perfume">
+
+          <label style="font-weight: bold; font-size: 14px; color: #333333;">Valor do Item (R$):</label>
+          <input id="swal-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="R$ 0,00">
+
+          <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição (Opcional):</label>
+          <input id="swal-espec" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+
+          <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja (Opcional):</label>
+          <input id="swal-link" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+          
+          <button id="btn-add-mais" type="button" style="background: transparent; border: 2px dashed #2196f3; color: #2196f3; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold;">➕ Adicionar mais um item a este kit</button>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Salvar Pedido',
+      cancelButtonText: 'Cancelar',
+      didOpen: () => {
+        document.getElementById('btn-add-mais').addEventListener('click', () => {
+          window._addMaisClicked = true;
+          Swal.clickConfirm();
+        });
+      },
+      preConfirm: () => {
+        const isAddMais = window._addMaisClicked;
+        window._addMaisClicked = false;
+
+        const nomeKit = document.getElementById('swal-nome-kit').value || 'Pedido de Presente';
+        const item = document.getElementById('swal-item').value;
+        const valorInput = document.getElementById('swal-valor').value;
+        const valor = parseFloat(valorInput.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
+        const tamanhoEspecificacao = document.getElementById('swal-espec').value;
+        let linkLoja = document.getElementById('swal-link').value;
+        
+        if (isAddMais) {
+          if (!item) {
+             Swal.showValidationMessage('Preencha o nome do item antes de adicionar!');
+             return false;
+          }
+          if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
+          itensDoPedido.push({ item, valor, tamanhoEspecificacao, linkLoja });
+          return { addMais: true, nomeKitAtual: nomeKit };
+        } else {
+          let finalItens = [...itensDoPedido];
+          if (item) {
+            if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
+            finalItens.push({ item, valor, tamanhoEspecificacao, linkLoja });
+          }
+          if (finalItens.length === 0) {
+            Swal.showValidationMessage('Adicione pelo menos 1 item para criar o pedido!');
+            return false;
+          }
+          return { addMais: false, nomeKit, finalItens };
+        }
+      }
+    });
+
+    if (res.isDismissed) return;
+    if (res.isConfirmed) {
+      if (res.value.addMais) {
+        nomeKitCache = res.value.nomeKitAtual;
+        continue;
+      } else {
+        finalResult = res.value;
+        break;
+      }
+    }
+  }
+
+  if (finalResult) {
     try {
-      await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formValues) });
+      const payload = {
+        nomeFamiliar: props.usuarioAtual,
+        nomeKit: finalResult.nomeKit,
+        itens: finalResult.finalItens
+      };
+      await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       Swal.fire('Pronto!', 'Pedido criado!', 'success');
       fetchPresentes();
     } catch (error) { Swal.fire('Erro', 'Falha ao conectar.', 'error'); }
@@ -196,21 +253,18 @@ const adicionarPresente = async () => {
 
 const editarKit = async (kit) => {
   const { value: formValues } = await Swal.fire({
-    title: 'Editar Pedido Principal',
+    title: 'Editar Nome do Pedido',
     html: `
       <div style="text-align: left;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Nome do Pedido (Ex: Kit Verão):</label>
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Nome do Pedido (Ex: Kit Verão):</label>
         <input id="swal-edit-nome" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="${kit.nomeKit}">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Meta de Valor (R$):</label>
-        <input id="swal-edit-meta" type="number" class="swal2-input" style="width: 100%; box-sizing: border-box;" value="${kit.meta || 150}">
       </div>
     `,
     showCancelButton: true,
     confirmButtonText: 'Salvar',
     preConfirm: () => {
       const nomeKit = document.getElementById('swal-edit-nome').value || 'Pedido de Presente';
-      const meta = parseFloat(document.getElementById('swal-edit-meta').value) || 150;
-      return { nomeKit, meta };
+      return { nomeKit };
     }
   });
 
@@ -228,13 +282,13 @@ const adicionarSubItem = async (kit) => {
     title: 'Adicionar Item',
     html: `
       <div style="text-align: left;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Item:</label>
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Item:</label>
         <input id="swal-sub-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Valor (R$):</label>
-        <input id="swal-sub-valor" type="number" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Descrição (Opcional):</label>
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Valor (R$):</label>
+        <input id="swal-sub-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="R$ 0,00">
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição (Opcional):</label>
         <input id="swal-sub-desc" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
-        <label style="font-weight: bold; font-size: 14px; color: #333;">Link (Opcional):</label>
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Link (Opcional):</label>
         <input id="swal-sub-link" class="swal2-input" style="width: 100%; box-sizing: border-box;">
       </div>
     `,
@@ -242,7 +296,8 @@ const adicionarSubItem = async (kit) => {
     confirmButtonText: 'Adicionar',
     preConfirm: () => {
       const item = document.getElementById('swal-sub-item').value;
-      const valor = parseFloat(document.getElementById('swal-sub-valor').value) || 0;
+      const valorInput = document.getElementById('swal-sub-valor').value;
+      const valor = parseFloat(valorInput.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
       const tamanhoEspecificacao = document.getElementById('swal-sub-desc').value;
       let linkLoja = document.getElementById('swal-sub-link').value;
       
