@@ -47,7 +47,7 @@
             <thead>
               <tr style="background: #eee;">
                 <th style="padding: 10px; border: 1px solid #ccc; text-align: left;">Nome</th>
-                <th style="padding: 10px; border: 1px solid #ccc; width: 120px;">Ações</th>
+                <th style="padding: 10px; border: 1px solid #ccc; width: 150px;">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -56,8 +56,9 @@
                   <span v-if="p.isActive" style="color: #2e7d32; font-weight: bold;">{{ p.name }}</span>
                   <span v-else style="color: #999; text-decoration: line-through;">{{ p.name }} (Inativo)</span>
                 </td>
-                <td style="padding: 10px; border: 1px solid #ccc; text-align: center;">
-                  <button @click="adminEditarParticipante(p)" style="background: #2196f3; color: white; border: none; border-radius: 3px; padding: 6px; cursor: pointer; font-size: 1rem; margin-right: 5px;" title="Editar Nome ou Ativar/Desativar">✏️</button>
+                <td style="padding: 10px; border: 1px solid #ccc; text-align: center; white-space: nowrap;">
+                  <button @click="adminToggleAtivo(p)" :style="{ background: p.isActive ? '#ff9800' : '#4CAF50' }" style="color: white; border: none; border-radius: 3px; padding: 6px; cursor: pointer; font-size: 1rem; margin-right: 5px;" :title="p.isActive ? 'Desativar Participante' : 'Ativar Participante'">{{ p.isActive ? '⏸️' : '▶️' }}</button>
+                  <button @click="adminEditarParticipante(p)" style="background: #2196f3; color: white; border: none; border-radius: 3px; padding: 6px; cursor: pointer; font-size: 1rem; margin-right: 5px;" title="Editar Nome">✏️</button>
                   <button @click="adminDeletarParticipante(p)" style="background: #f44336; color: white; border: none; border-radius: 3px; padding: 6px; cursor: pointer; font-size: 1rem;" title="Apagar Permanentemente">🗑️</button>
                 </td>
               </tr>
@@ -510,38 +511,51 @@ const adminAdicionarParticipante = async () => {
   }
 };
 
+const adminToggleAtivo = async (p) => {
+  const novoStatus = !p.isActive;
+  try {
+    const res = await fetch(`${BASE_URL}/api/admin/participant/${p._id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: adminPass.value, name: p.name, isActive: novoStatus })
+    });
+    const data = await res.json();
+    if (data.success) {
+      p.isActive = novoStatus;
+      await carregarDadosAdmin();
+      await fetchParticipants();
+    } else {
+      Swal.fire('Erro', data.error, 'error');
+    }
+  } catch (e) {
+    Swal.fire('Erro', 'Erro ao alterar status', 'error');
+  }
+};
+
 const adminEditarParticipante = async (p) => {
-  const { value: formValues } = await Swal.fire({
-    title: 'Editar Participante',
-    html: `
-      <input id="swal-edit-name" class="swal2-input" value="${p.name}" style="box-sizing: border-box; width: calc(100% - 2em); max-width: 100%;">
-      <label style="display: flex; align-items: center; justify-content: center; margin-top: 15px; cursor: pointer;">
-        <input type="checkbox" id="swal-edit-active" style="width: 20px; height: 20px; margin-right: 10px;" ${p.isActive ? 'checked' : ''}>
-        <span style="font-weight: bold; color: #333;">Participante Ativo (Participa do sorteio)</span>
-      </label>
-    `,
-    focusConfirm: false,
+  const { value: newName } = await Swal.fire({
+    title: 'Editar Nome',
+    input: 'text',
+    inputValue: p.name,
     showCancelButton: true,
     confirmButtonText: 'Salvar',
-    preConfirm: () => {
-      return {
-        name: document.getElementById('swal-edit-name').value.trim(),
-        isActive: document.getElementById('swal-edit-active').checked
+    inputValidator: (value) => {
+      if (!value.trim()) {
+        return 'O nome não pode ser vazio'
       }
     }
   });
 
-  if (formValues) {
-    if (!formValues.name) return Swal.fire('Erro', 'O nome não pode ser vazio', 'error');
+  if (newName && newName.trim() !== p.name) {
     try {
       const res = await fetch(`${BASE_URL}/api/admin/participant/${p._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPass.value, name: formValues.name, isActive: formValues.isActive })
+        body: JSON.stringify({ password: adminPass.value, name: newName.trim(), isActive: p.isActive })
       });
       const data = await res.json();
       if (data.success) {
-        Swal.fire('Sucesso', 'Participante atualizado.', 'success');
+        Swal.fire('Sucesso', 'Nome atualizado.', 'success');
         await carregarDadosAdmin();
         await fetchParticipants(); // Update frontend state
       } else {
