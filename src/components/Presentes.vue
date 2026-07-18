@@ -142,6 +142,74 @@ window.formatarMoeda = function(input) {
   input.value = "R$ " + valor;
 };
 
+const renderLinksInput = (containerId, initialLinks) => {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  let linksArray = initialLinks ? initialLinks.split('\\n') : [''];
+  if (linksArray.length === 0) linksArray = [''];
+  
+  const render = (arr) => {
+    container.innerHTML = '';
+    arr.forEach((link, index) => {
+      const div = document.createElement('div');
+      div.style.display = 'flex';
+      div.style.alignItems = 'center';
+      div.style.gap = '8px';
+      div.style.marginBottom = '10px';
+      
+      const input = document.createElement('input');
+      input.className = 'swal2-input swal-link-input';
+      input.style.margin = '0';
+      input.style.flex = '1';
+      input.style.height = '42px';
+      input.style.fontSize = '14px';
+      input.placeholder = `Link ${index + 1}`;
+      input.value = link;
+      
+      div.appendChild(input);
+      
+      if (index === arr.length - 1) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerHTML = '+';
+        btn.style.background = '#2e7d32';
+        btn.style.color = 'white';
+        btn.style.border = 'none';
+        btn.style.borderRadius = '5px';
+        btn.style.width = '42px';
+        btn.style.height = '42px';
+        btn.style.fontSize = '24px';
+        btn.style.lineHeight = '1';
+        btn.style.cursor = 'pointer';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.onclick = () => {
+          const currentInputs = Array.from(container.querySelectorAll('.swal-link-input')).map(inp => inp.value);
+          currentInputs.push('');
+          render(currentInputs);
+        };
+        div.appendChild(btn);
+      } else {
+        const spacer = document.createElement('div');
+        spacer.style.width = '42px';
+        div.appendChild(spacer);
+      }
+      
+      container.appendChild(div);
+    });
+  };
+  render(linksArray);
+};
+
+const getLinksValues = (containerId) => {
+  const container = document.getElementById(containerId);
+  if (!container) return '';
+  const inputs = Array.from(container.querySelectorAll('.swal-link-input'));
+  return inputs.map(inp => inp.value.trim()).filter(l => l).map(l => l.startsWith('http') ? l : 'https://' + l).join('\\n');
+};
+
 const adicionarPresente = async (isKit = false) => {
   if (!props.usuarioAtual) {
     Swal.fire('Identifique-se!', 'Por favor, selecione quem é você no canto superior direito da página antes de criar um pedido.', 'warning');
@@ -193,8 +261,8 @@ const adicionarPresente = async (isKit = false) => {
       <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
       <input id="swal-espec" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;">
 
-      <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja (separados por linha):</label>
-      <textarea id="swal-link" class="swal2-textarea" style="width: 100%; box-sizing: border-box; margin: 0 0 15px 0; max-width: 100%; min-height: 60px; font-size: 14px;"></textarea>
+      <label style="font-weight: bold; font-size: 14px; color: #333333;">Links da loja:</label>
+      <div id="swal-links-container" style="margin-bottom: 15px;"></div>
     `;
     
     if (isKit) {
@@ -212,6 +280,7 @@ const adicionarPresente = async (isKit = false) => {
       confirmButtonText: 'Salvar Pedido',
       cancelButtonText: 'Cancelar',
       didOpen: () => {
+        renderLinksInput('swal-links-container', '');
         if (isKit) {
           const btnAdd = document.getElementById('btn-add-mais');
           if (btnAdd) {
@@ -235,11 +304,7 @@ const adicionarPresente = async (isKit = false) => {
         const valorInput = document.getElementById('swal-valor').value;
         const valor = parseFloat(valorInput.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
         const tamanhoEspecificacao = document.getElementById('swal-espec').value;
-        let linkLoja = document.getElementById('swal-link').value;
-        
-        if (linkLoja) {
-          linkLoja = linkLoja.split(/[,\\n]+/).map(l => l.trim()).filter(l => l).map(l => l.startsWith('http') ? l : 'https://' + l).join('\\n');
-        }
+        let linkLoja = getLinksValues('swal-links-container');
 
         if (isKit && isAddMais) {
           if (!item) {
@@ -330,10 +395,13 @@ const editarIndividual = async (kit) => {
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
         <input id="swal-edit-ind-desc" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;" value="${item.tamanhoEspecificacao || ''}">
         
-        <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja (separados por linha):</label>
-        <textarea id="swal-edit-ind-link" class="swal2-textarea" style="width: 100%; box-sizing: border-box; margin: 0 0 15px 0; max-width: 100%; min-height: 60px; font-size: 14px;">${item.linkLoja || ''}</textarea>
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Links da loja:</label>
+        <div id="swal-edit-ind-links-container" style="margin-bottom: 15px;"></div>
       </div>
     `,
+    didOpen: () => {
+      renderLinksInput('swal-edit-ind-links-container', item.linkLoja || '');
+    },
     showCancelButton: true,
     confirmButtonText: 'Salvar',
     preConfirm: () => {
@@ -341,14 +409,11 @@ const editarIndividual = async (kit) => {
       const valorInput = document.getElementById('swal-edit-ind-valor').value;
       const valor = parseFloat(valorInput.replace('R$ ', '').replace(/\\./g, '').replace(',', '.')) || 0;
       const tamanhoEspecificacao = document.getElementById('swal-edit-ind-desc').value;
-      let linkLoja = document.getElementById('swal-edit-ind-link').value;
+      let linkLoja = getLinksValues('swal-edit-ind-links-container');
       
       if (!novoItem) {
         Swal.showValidationMessage('O nome do item é obrigatório!');
         return false;
-      }
-      if (linkLoja) {
-        linkLoja = linkLoja.split(/[,\\n]+/).map(l => l.trim()).filter(l => l).map(l => l.startsWith('http') ? l : 'https://' + l).join('\\n');
       }
       return { item: novoItem, valor, tamanhoEspecificacao, linkLoja };
     }
@@ -378,10 +443,13 @@ const adicionarSubItem = async (kit) => {
         <input id="swal-sub-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;" placeholder="R$ 0,00">
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
         <input id="swal-sub-desc" class="swal2-input" style="width: 100%; box-sizing: border-box; margin: 0 0 10px 0; max-width: 100%;">
-        <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja (separados por linha):</label>
-        <textarea id="swal-sub-link" class="swal2-textarea" style="width: 100%; box-sizing: border-box; margin: 0 0 15px 0; max-width: 100%; min-height: 60px; font-size: 14px;"></textarea>
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Links da loja:</label>
+        <div id="swal-sub-links-container" style="margin-bottom: 15px;"></div>
       </div>
     `,
+    didOpen: () => {
+      renderLinksInput('swal-sub-links-container', '');
+    },
     showCancelButton: true,
     confirmButtonText: 'Adicionar',
     preConfirm: () => {
@@ -389,14 +457,11 @@ const adicionarSubItem = async (kit) => {
       const valorInput = document.getElementById('swal-sub-valor').value;
       const valor = parseFloat(valorInput.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
       const tamanhoEspecificacao = document.getElementById('swal-sub-desc').value;
-      let linkLoja = document.getElementById('swal-sub-link').value;
+      let linkLoja = getLinksValues('swal-sub-links-container');
       
       if (!item) {
         Swal.showValidationMessage('O nome do item é obrigatório!');
         return false;
-      }
-      if (linkLoja) {
-        linkLoja = linkLoja.split(/[,\\n]+/).map(l => l.trim()).filter(l => l).map(l => l.startsWith('http') ? l : 'https://' + l).join('\\n');
       }
       return { item, valor, tamanhoEspecificacao, linkLoja };
     }
