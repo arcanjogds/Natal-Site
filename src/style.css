@@ -20,7 +20,7 @@ body {
 }
 
 .card-natalino h1, .card-natalino h2, .card-natalino h3, .card-natalino p {
-  color: #fff !important;
+  color: #fff;
 }
 
 .btn-brilho {

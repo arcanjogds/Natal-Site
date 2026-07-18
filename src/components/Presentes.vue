@@ -156,16 +156,10 @@ const adicionarPresente = async () => {
     }
 
     const res = await Swal.fire({
-      title: 'Criar Novo Pedido / Kit',
+      title: 'Adicionar Item',
       html: `
         <div style="text-align: left;">
-          <label style="font-weight: bold; font-size: 14px; color: #333333;">Nome do Pedido (Ex: Kit Praia):</label>
-          <input id="swal-nome-kit" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Opcional" value="${nomeKitCache}">
-          
           ${itensHtml}
-
-          <hr style="margin: 15px 0;">
-          <h4 style="margin: 0 0 10px 0; color: #333333;">Adicionar Item</h4>
 
           <label style="font-weight: bold; font-size: 14px; color: #333333;">Item:</label>
           <input id="swal-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="Ex: Perfume">
@@ -179,7 +173,7 @@ const adicionarPresente = async () => {
           <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja (Opcional):</label>
           <input id="swal-link" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
           
-          <button id="btn-add-mais" type="button" style="background: transparent; border: 2px dashed #2196f3; color: #2196f3; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold;">➕ Adicionar mais um item a este kit</button>
+          <button id="btn-add-mais" type="button" style="background: transparent; border: 2px dashed #2196f3; color: #2196f3; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold;">➕ Adicionar mais um item e formar um kit</button>
         </div>
       `,
       showCancelButton: true,
@@ -195,8 +189,12 @@ const adicionarPresente = async () => {
         const isAddMais = window._addMaisClicked;
         window._addMaisClicked = false;
 
-        const nomeKit = document.getElementById('swal-nome-kit').value || 'Pedido de Presente';
         const item = document.getElementById('swal-item').value;
+        const nomeKitEl = document.getElementById('swal-nome-kit');
+        let nomeKit = nomeKitEl ? nomeKitEl.value : '';
+        if (!nomeKit) {
+          nomeKit = nomeKitCache || (itensDoPedido.length > 0 ? itensDoPedido[0].item : (item || 'Pedido de Presente'));
+        }
         const valorInput = document.getElementById('swal-valor').value;
         const valor = parseFloat(valorInput.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
         const tamanhoEspecificacao = document.getElementById('swal-espec').value;
