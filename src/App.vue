@@ -35,10 +35,36 @@
           <a href="?adminTab=ceia" @click.prevent="adminTab = 'ceia'" :style="adminTab === 'ceia' ? activeStyle : inactiveStyle" style="text-decoration: none; display: inline-block; text-align: center;">Cardápio</a>
         </div>
 
-        <div v-if="adminTab === 'sorteio'" style="text-align: center;">
-          <p style="font-size: 14px; color: #546e7a;">Edite a lista abaixo e clique no botão para apagar e gerar novo sorteio.</p>
-          <textarea v-model="adminNamesList" rows="12" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem;"></textarea>
-          <button @click="regerarSorteio" style="margin-top: 15px; padding: 12px; background: #E53935; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1.1rem;">🔄 Refazer Sorteio Oficial</button>
+        <div v-if="adminTab === 'sorteio'">
+          <h4 style="color: #333; text-align: center; margin-top: 0;">Participantes do Sorteio</h4>
+          
+          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <input v-model="novoParticipanteNome" placeholder="Nome do participante" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem;" @keyup.enter="adminAdicionarParticipante" />
+            <button @click="adminAdicionarParticipante" style="padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Adicionar</button>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+              <tr style="background: #eee;">
+                <th style="padding: 10px; border: 1px solid #ccc; text-align: left;">Nome</th>
+                <th style="padding: 10px; border: 1px solid #ccc; width: 120px;">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in sortedAdminParticipantsSorteio" :key="p._id">
+                <td style="padding: 10px; border: 1px solid #ccc;">
+                  <span v-if="p.isActive" style="color: #2e7d32; font-weight: bold;">{{ p.name }}</span>
+                  <span v-else style="color: #999; text-decoration: line-through;">{{ p.name }} (Inativo)</span>
+                </td>
+                <td style="padding: 10px; border: 1px solid #ccc; text-align: center;">
+                  <button @click="adminEditarParticipante(p)" style="background: #2196f3; color: white; border: none; border-radius: 3px; padding: 6px; cursor: pointer; font-size: 1rem; margin-right: 5px;" title="Editar Nome ou Ativar/Desativar">✏️</button>
+                  <button @click="adminDeletarParticipante(p)" style="background: #f44336; color: white; border: none; border-radius: 3px; padding: 6px; cursor: pointer; font-size: 1rem;" title="Apagar Permanentemente">🗑️</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <button @click="regerarSorteio" style="margin-top: 15px; padding: 12px; background: #E53935; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1.1rem;">🔄 Gerar Sorteio Oficial (Apenas Ativos)</button>
         </div>
 
         <div v-if="adminTab === 'senhas'">
@@ -52,8 +78,9 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="p in adminParticipants" :key="p.name">
+              <tr v-for="p in sortedAdminParticipantsSenhas" :key="p._id">
                 <td style="padding: 10px; border: 1px solid #ccc;">
+                  <span v-if="p.name === nomeSalvo" style="background: #ffebee; color: #c62828; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-right: 5px;">Admin</span>
                   {{ p.name }}
                   <span v-if="p.isActive === false" style="color: #999; font-size: 0.8rem; margin-left: 5px;">(Inativo)</span>
                 </td>
@@ -163,7 +190,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import Swal from 'sweetalert2';
 import Ceia from './components/Ceia.vue';
 import Presentes from './components/Presentes.vue';
@@ -197,6 +224,25 @@ const adminNamesList = ref('');
 const adminParticipants = ref([]);
 const adminPresentes = ref([]);
 const adminCeia = ref([]);
+const novoParticipanteNome = ref('');
+
+const sortedAdminParticipantsSorteio = computed(() => {
+  return [...adminParticipants.value].sort((a, b) => {
+    if (a.isActive && !b.isActive) return -1;
+    if (!a.isActive && b.isActive) return 1;
+    return a.name.localeCompare(b.name);
+  });
+});
+
+const sortedAdminParticipantsSenhas = computed(() => {
+  return [...adminParticipants.value].sort((a, b) => {
+    if (a.name === nomeSalvo.value && b.name !== nomeSalvo.value) return -1;
+    if (b.name === nomeSalvo.value && a.name !== nomeSalvo.value) return 1;
+    if (a.isActive && !b.isActive) return -1;
+    if (!a.isActive && b.isActive) return 1;
+    return a.name.localeCompare(b.name);
+  });
+});
 
 const nomeSalvo = ref('');
 const amigoSorteadoCache = ref('');
@@ -428,13 +474,11 @@ const adminAlterarSenha = async (name) => {
 };
 
 const regerarSorteio = async () => {
-  const nomesArray = adminNamesList.value.split('\n').map(n => n.trim()).filter(n => n !== '');
-  if (nomesArray.length < 3) return Swal.fire('Erro', 'Mínimo de 3 nomes.', 'warning');
-  const confirm = await Swal.fire({ title: 'Atenção!', text: 'Isso apaga o sorteio de todos!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#E53935', confirmButtonText: 'Refazer' });
+  const confirm = await Swal.fire({ title: 'Atenção!', text: 'Isso apaga o sorteio de todos e cria um novo apenas com os participantes ativos!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#E53935', confirmButtonText: 'Refazer Sorteio' });
   if (!confirm.isConfirmed) return;
   try {
     const res = await fetch(`${BASE_URL}/api/admin/shuffle`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPass.value, names: nomesArray })
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPass.value })
     });
     const data = await res.json();
     if (data.success) {
@@ -443,6 +487,105 @@ const regerarSorteio = async () => {
       await carregarDadosAdmin();
     } else { Swal.fire('Erro', data.error, 'error'); }
   } catch (e) { Swal.fire('Erro', 'Falha no servidor.', 'error'); }
+};
+
+const adminAdicionarParticipante = async () => {
+  const nome = novoParticipanteNome.value.trim();
+  if (!nome) return;
+  try {
+    const res = await fetch(`${BASE_URL}/api/admin/participant`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: adminPass.value, name: nome })
+    });
+    const data = await res.json();
+    if (data.success) {
+      novoParticipanteNome.value = '';
+      await carregarDadosAdmin();
+    } else {
+      Swal.fire('Erro', data.error, 'error');
+    }
+  } catch (e) {
+    Swal.fire('Erro', 'Erro ao adicionar', 'error');
+  }
+};
+
+const adminEditarParticipante = async (p) => {
+  const { value: formValues } = await Swal.fire({
+    title: 'Editar Participante',
+    html: `
+      <input id="swal-edit-name" class="swal2-input" value="${p.name}" style="box-sizing: border-box; width: calc(100% - 2em); max-width: 100%;">
+      <label style="display: flex; align-items: center; justify-content: center; margin-top: 15px; cursor: pointer;">
+        <input type="checkbox" id="swal-edit-active" style="width: 20px; height: 20px; margin-right: 10px;" ${p.isActive ? 'checked' : ''}>
+        <span style="font-weight: bold; color: #333;">Participante Ativo (Participa do sorteio)</span>
+      </label>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Salvar',
+    preConfirm: () => {
+      return {
+        name: document.getElementById('swal-edit-name').value.trim(),
+        isActive: document.getElementById('swal-edit-active').checked
+      }
+    }
+  });
+
+  if (formValues) {
+    if (!formValues.name) return Swal.fire('Erro', 'O nome não pode ser vazio', 'error');
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/participant/${p._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPass.value, name: formValues.name, isActive: formValues.isActive })
+      });
+      const data = await res.json();
+      if (data.success) {
+        Swal.fire('Sucesso', 'Participante atualizado.', 'success');
+        await carregarDadosAdmin();
+        await fetchParticipants(); // Update frontend state
+      } else {
+        Swal.fire('Erro', data.error, 'error');
+      }
+    } catch (e) {
+      Swal.fire('Erro', 'Erro ao atualizar', 'error');
+    }
+  }
+};
+
+const adminDeletarParticipante = async (p) => {
+  const { value: passConfirm } = await Swal.fire({
+    title: 'Apagar Permanentemente',
+    html: `<p style="color: #d33;">Você tem certeza que deseja apagar <b>${p.name}</b>?<br>Isso removerá a senha e não poderá ser desfeito.</p>`,
+    input: 'password',
+    inputPlaceholder: 'Confirme a senha de Admin',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    confirmButtonText: 'Apagar para sempre'
+  });
+
+  if (passConfirm) {
+    if (passConfirm !== adminPass.value) {
+      return Swal.fire('Erro', 'Senha incorreta.', 'error');
+    }
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/participant/${p._id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPass.value })
+      });
+      const data = await res.json();
+      if (data.success) {
+        Swal.fire('Apagado', 'Participante removido do site.', 'success');
+        await carregarDadosAdmin();
+        await fetchParticipants();
+      } else {
+        Swal.fire('Erro', data.error, 'error');
+      }
+    } catch (e) {
+      Swal.fire('Erro', 'Erro ao apagar', 'error');
+    }
+  }
 };
 
 const deletarPresentesSelecionados = async () => {
