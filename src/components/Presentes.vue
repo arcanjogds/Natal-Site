@@ -1,7 +1,7 @@
 <template>
   <div class="card-natalino" style="padding: 20px; margin-top: 20px; text-align: center;">
-    <h2 style="color: #0d47a1; margin-top: 0;">🛍️ Vitrine de Presentes</h2>
-    <p style="color: #1565c0; margin-bottom: 20px; font-size: 1.1rem;">Dicas do que a família quer ganhar!</p>
+    <h2 style="color: #e8f5e9; margin-top: 0;">🛍️ Vitrine de Presentes</h2>
+    <p style="color: #e8f5e9; margin-bottom: 20px; font-size: 1.1rem;">Dicas do que a família quer ganhar!</p>
 
     <!-- FILTRO POR NOME -->
     <div style="margin-bottom: 20px;">
@@ -33,7 +33,7 @@
                 <button @click="deletarPresente(kit._id)" style="background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 1.1rem;" title="Remover pedido completo">✖</button>
               </div>
 
-              <h4 style="margin: 0 0 10px 0; color: #8b0000; font-size: 1.2rem; padding-right: 50px;">{{ kit.nomeKit }}</h4>
+              <h4 style="margin: 0 0 10px 0; color: #333333; font-size: 1.2rem; padding-right: 50px;">{{ kit.nomeKit }}</h4>
               
               <!-- Total -->
               <div style="margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
@@ -47,9 +47,9 @@
               <div style="display: flex; flex-direction: column; gap: 10px;">
                 <div v-for="(item, idx) in kit.itens" :key="idx" style="background: #fff9f0; padding: 10px; border-radius: 5px; border: 1px solid #ccc; position: relative;">
                    <button v-if="usuarioAtual === nome" @click="deletarSubItem(kit, idx)" style="position: absolute; top: 5px; right: 5px; background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 0.9rem;" title="Remover item">✖</button>
-                   <p style="margin: 0; font-weight: bold; color: #8b0000; padding-right: 20px;">{{ item.item }}</p>
+                   <p style="margin: 0; font-weight: bold; color: #333333; padding-right: 20px;">{{ item.item }}</p>
                    <p v-if="item.valor" style="margin: 5px 0 0 0; font-size: 0.95rem; color: #2e7d32; font-weight: bold;">💰 R$ {{ item.valor.toFixed(2).replace('.', ',') }}</p>
-                   <p v-if="item.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #8b0000;">📝 {{ item.tamanhoEspecificacao }}</p>
+                   <p v-if="item.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #333333;">📝 {{ item.tamanhoEspecificacao }}</p>
                    <a v-if="item.linkLoja" :href="item.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #8b0000; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #8b0000;">🛒 Ver na Loja</a>
                 </div>
               </div>

@@ -10,7 +10,7 @@
       <button @click="openAdmin" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; font-size: 1.2rem; cursor: pointer;" title="Acesso Admin">🔒</button>
 
       <h1 style="color: #c62828; font-size: 2.2rem; margin-top: 0;">🎅 Natal 2026 🎄</h1>
-      <p style="color: #555; margin-bottom: 2rem; font-size: 1.1rem;">Selecione seu nome e digite a senha</p>
+      <p style="color: #e8f5e9; margin-bottom: 2rem; font-size: 1.1rem;">Selecione seu nome e digite a senha</p>
       
       <select v-model="nomeSelecionadoGlobally" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1rem;">
         <option value="" disabled selected>👤 Quem é você?</option>
