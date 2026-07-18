@@ -211,7 +211,7 @@ const getSnowflakeStyle = () => ({
   opacity: Math.random()
 });
 
-const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : 'https://natal-bl3x.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const activeTab = ref(localStorage.getItem('activeTab') || 'sorteio');
 
@@ -424,13 +424,17 @@ const resetView = () => { revealedName.value = ''; };
 // ===============================
 const openAdmin = async () => {
   const { value: password } = await Swal.fire({ title: 'Área Restrita', input: 'password', inputPlaceholder: 'Digite a senha', showCancelButton: true });
-  if (password === 'admin123') { 
-    isAdmin.value = true; 
+  if (password) { 
     adminPass.value = password;
-    adminNamesList.value = participants.value.map(p => p.name).join('\n');
-    await carregarDadosAdmin();
+    const success = await carregarDadosAdmin();
+    if (success) {
+      isAdmin.value = true;
+      adminNamesList.value = participants.value.map(p => p.name).join('\n');
+    } else {
+      Swal.fire('Erro', 'Senha incorreta', 'error');
+      adminPass.value = '';
+    }
   }
-  else if (password) { Swal.fire('Erro', 'Senha incorreta', 'error'); }
 };
 
 const sairAdmin = () => {
@@ -444,6 +448,7 @@ const carregarDadosAdmin = async () => {
     let res = await fetch(`${BASE_URL}/api/admin/participants`, {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ password: adminPass.value })
     });
+    if (!res.ok) return false;
     adminParticipants.value = await res.json();
 
     // Presentes
@@ -455,9 +460,11 @@ const carregarDadosAdmin = async () => {
     res = await fetch(`${BASE_URL}/api/ceia`);
     let cData = await res.json();
     adminCeia.value = cData.map(x => ({...x, selecionado: false}));
-
+    
+    return true;
   } catch(e) {
     console.error(e);
+    return false;
   }
 };
 

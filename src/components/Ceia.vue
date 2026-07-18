@@ -81,7 +81,7 @@ const props = defineProps({
 });
 
 const pratos = ref([]);
-const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : 'https://natal-bl3x.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const apiUrl = `${BASE_URL}/api/ceia`;
 
 const nomesFamilia = computed(() => props.participants.map(p => p.name));
