@@ -43,12 +43,14 @@
   </div>
 
   <!-- BOTAO FLUTUANTE (FAB) -->
-  <div class="fab-container">
-    <button @click="adicionarPresente" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
-      <span style="font-size: 1.2rem;">➕</span>
-      <span class="fab-text">Adicionar Pedido</span>
-    </button>
-  </div>
+  <teleport to="body">
+    <div class="fab-container">
+      <button @click="adicionarPresente" class="fab-btn" style="background: #2e7d32; color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+        <span style="font-size: 1.2rem;">➕</span>
+        <span class="fab-text">Adicionar Pedido</span>
+      </button>
+    </div>
+  </teleport>
 </template>
 
 <script setup>
