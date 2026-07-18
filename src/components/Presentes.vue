@@ -30,6 +30,7 @@
               
               <div v-if="usuarioAtual === nome" style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 2;">
                 <button v-if="kit.isKit !== false" @click="editarKit(kit)" style="background: transparent; border: none; color: #2e7d32; cursor: pointer; font-size: 1rem;" title="Editar meta e nome do pedido">✏️</button>
+                <button v-if="kit.isKit === false" @click="editarIndividual(kit)" style="background: transparent; border: none; color: #2e7d32; cursor: pointer; font-size: 1rem;" title="Editar item">✏️</button>
                 <button @click="deletarPresente(kit._id)" style="background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 1.1rem;" title="Remover pedido completo">✖</button>
               </div>
 
@@ -305,6 +306,56 @@ const editarKit = async (kit) => {
     try {
       await fetch(`${apiUrl}/${kit._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formValues) });
       Swal.fire('Atualizado!', 'Pedido modificado.', 'success');
+      fetchPresentes();
+    } catch (e) { Swal.fire('Erro', 'Falha ao conectar.', 'error'); }
+  }
+};
+
+const editarIndividual = async (kit) => {
+  const item = kit.itens && kit.itens.length > 0 ? kit.itens[0] : {};
+  const { value: formValues } = await Swal.fire({
+    title: 'Editar Pedido Individual',
+    html: `
+      <div style="text-align: left;">
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Item:</label>
+        <input id="swal-edit-ind-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="${item.item || ''}">
+        
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Valor (R$):</label>
+        <input id="swal-edit-ind-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="R$ ${(item.valor || 0).toFixed(2).replace('.', ',')}">
+        
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
+        <input id="swal-edit-ind-desc" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" value="${item.tamanhoEspecificacao || ''}">
+        
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Link:</label>
+        <input id="swal-edit-ind-link" class="swal2-input" style="width: 100%; box-sizing: border-box;" value="${item.linkLoja || ''}">
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Salvar',
+    preConfirm: () => {
+      const novoItem = document.getElementById('swal-edit-ind-item').value;
+      const valorInput = document.getElementById('swal-edit-ind-valor').value;
+      const valor = parseFloat(valorInput.replace('R$ ', '').replace(/\\./g, '').replace(',', '.')) || 0;
+      const tamanhoEspecificacao = document.getElementById('swal-edit-ind-desc').value;
+      let linkLoja = document.getElementById('swal-edit-ind-link').value;
+      
+      if (!novoItem) {
+        Swal.showValidationMessage('O nome do item é obrigatório!');
+        return false;
+      }
+      if (linkLoja && !linkLoja.startsWith('http')) linkLoja = 'https://' + linkLoja;
+      return { item: novoItem, valor, tamanhoEspecificacao, linkLoja };
+    }
+  });
+
+  if (formValues) {
+    try {
+      await fetch(`${apiUrl}/${kit._id}`, { 
+        method: 'PUT', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ itens: [formValues], nomeKit: formValues.item }) 
+      });
+      Swal.fire('Atualizado!', 'Item modificado.', 'success');
       fetchPresentes();
     } catch (e) { Swal.fire('Erro', 'Falha ao conectar.', 'error'); }
   }
