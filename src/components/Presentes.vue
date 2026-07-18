@@ -47,9 +47,9 @@
               <div style="display: flex; flex-direction: column; gap: 10px;">
                 <div v-for="(item, idx) in kit.itens" :key="idx" style="background: #fff9f0; padding: 10px; border-radius: 5px; border: 1px solid #ccc; position: relative;">
                    <button v-if="usuarioAtual === nome" @click="deletarSubItem(kit, idx)" style="position: absolute; top: 5px; right: 5px; background: transparent; border: none; color: #c62828; cursor: pointer; font-size: 0.9rem;" title="Remover item">✖</button>
-                   <p style="margin: 0; font-weight: bold; color: #333333; padding-right: 20px;">{{ item.item }}</p>
+                   <p style="margin: 0; font-weight: bold; color: #8b0000; padding-right: 20px;">{{ item.item }}</p>
                    <p v-if="item.valor" style="margin: 5px 0 0 0; font-size: 0.95rem; color: #2e7d32; font-weight: bold;">💰 R$ {{ item.valor.toFixed(2).replace('.', ',') }}</p>
-                   <p v-if="item.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #333333;">📝 {{ item.tamanhoEspecificacao }}</p>
+                   <p v-if="item.tamanhoEspecificacao" style="margin: 5px 0 0 0; font-size: 0.85rem; color: #8b0000;">📝 {{ item.tamanhoEspecificacao }}</p>
                    <a v-if="item.linkLoja" :href="item.linkLoja" target="_blank" style="display: inline-block; margin-top: 8px; color: #8b0000; font-size: 0.85rem; text-decoration: none; font-weight: bold; border-bottom: 1px solid #8b0000;">🛒 Ver na Loja</a>
                 </div>
               </div>
