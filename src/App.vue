@@ -40,7 +40,7 @@
         </div>
 
         <div v-if="adminTab === 'sorteio'">
-          <h4 style="color: #333; text-align: center; margin-top: 0;">Participantes do Sorteio</h4>
+          <h4 style="color: #fff; text-align: center; margin-top: 0;">Participantes do Sorteio</h4>
           
           <div style="display: flex; gap: 10px; margin-bottom: 20px;">
             <input v-model="novoParticipanteNome" placeholder="Nome do participante" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem;" @keyup.enter="adminAdicionarParticipante" />
@@ -76,7 +76,7 @@
         </div>
 
         <div v-if="adminTab === 'senhas'">
-          <h4 style="color: #333;">Participantes e Senhas</h4>
+          <h4 style="color: #fff;">Participantes e Senhas</h4>
           <table class="admin-table">
             <thead>
               <tr>
@@ -103,7 +103,7 @@
         </div>
 
         <div v-if="adminTab === 'presentes'">
-          <h4 style="color: #333;">Gerenciar Presentes</h4>
+          <h4 style="color: #fff;">Gerenciar Presentes</h4>
           <div style="margin-bottom: 10px; display: flex; gap: 10px;">
             <button @click="deletarPresentesSelecionados" style="padding: 8px 15px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Apagar Selecionados</button>
             <button @click="deletarTodosPresentes" style="padding: 8px 15px; background: #b71c1c; color: white; border: none; border-radius: 5px; cursor: pointer;">Apagar TODOS</button>
@@ -117,7 +117,7 @@
         </div>
 
         <div v-if="adminTab === 'ceia'">
-          <h4 style="color: #333;">Gerenciar Cardápio</h4>
+          <h4 style="color: #fff;">Gerenciar Cardápio</h4>
           <div style="margin-bottom: 10px; display: flex; gap: 10px;">
             <button @click="deletarCeiaSelecionada" style="padding: 8px 15px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Apagar Selecionados</button>
             <button @click="deletarTodaCeia" style="padding: 8px 15px; background: #b71c1c; color: white; border: none; border-radius: 5px; cursor: pointer;">Apagar TODOS</button>
@@ -157,9 +157,9 @@
 
       <div v-if="activeTab === 'sorteio'">
 
-        <div v-if="amigoSorteadoCache && !revealedName" style="background: #e3f2fd; padding: 20px; border-radius: 8px; border: 1px solid #90caf9; margin-top: 20px;">
-          <p style="font-size: 1.2rem; color: #1565c0; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto!</p>
-          <button @click="mostrarAmigoSorteadoCache" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #1976D2; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
+        <div v-if="amigoSorteadoCache && !revealedName" style="background: #fff9f0; padding: 20px; border-radius: 8px; border: 1px solid #e5c09e; margin-top: 20px;">
+          <p style="font-size: 1.2rem; color: #c62828; font-weight: bold;">{{ nomeSalvo }}, você já tirou seu amigo secreto!</p>
+          <button @click="mostrarAmigoSorteadoCache" style="margin-top: 10px; padding: 15px; font-size: 16px; cursor: pointer; background: #2e7d32; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold;">👀 Ver meu resultado novamente</button>
         </div>
 
         <div v-else-if="!revealedName" style="text-align: center; padding: 20px 0;">
@@ -172,7 +172,7 @@
           <h2>Você tirou:</h2>
           <h1 style="color: #E53935; font-size: 3.5rem; margin: 20px 0; background: #ffebee; padding: 20px; border-radius: 10px; border: 2px dashed #E53935;">{{ revealedName }}</h1>
           
-          <a :href="`?tab=presentes&user=${revealedName}`" @click.prevent="irParaPresentes(revealedName)" style="margin-top: 20px; padding: 12px; font-size: 16px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-decoration: none; display: block; text-align: center; box-sizing: border-box;">🎁 Ver a lista de presentes de {{ revealedName }}</a>
+          <a :href="`?tab=presentes&user=${revealedName}`" @click.prevent="irParaPresentes(revealedName)" style="margin-top: 20px; padding: 12px; font-size: 16px; background: #2e7d32; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-decoration: none; display: block; text-align: center; box-sizing: border-box;">🎁 Ver a lista de presentes de {{ revealedName }}</a>
           <button @click="resetView" style="margin-top: 10px; padding: 12px; font-size: 16px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Sair e Ocultar</button>
         </div>
 
