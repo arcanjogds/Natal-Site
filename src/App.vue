@@ -140,7 +140,6 @@
         <div v-if="revealedName">
           <h2>Você tirou:</h2>
           <h1 style="color: #E53935; font-size: 3.5rem; margin: 20px 0; background: #ffebee; padding: 20px; border-radius: 10px; border: 2px dashed #E53935;">{{ revealedName }}</h1>
-          <p style="font-size: 1.3rem; font-weight: bold; color: #d32f2f;">📸 Tire um PRINT desta tela para não esquecer!</p>
           
           <button @click="irParaPresentes(revealedName)" style="margin-top: 20px; padding: 12px; font-size: 16px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">🎁 Ver a lista de presentes de {{ revealedName }}</button>
           <button @click="resetView" style="margin-top: 10px; padding: 12px; font-size: 16px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Sair e Ocultar</button>
@@ -296,19 +295,6 @@ const abrirPerfil = async () => {
 };
 
 const revealSecretSanta = async () => {
-  const result = await Swal.fire({
-    title: 'É você mesmo?',
-    html: `Você confirma que é <b>${nomeSalvo.value}</b>?<br><br><small style="color: #d33;">Atenção: Só é possível sortear uma vez!</small>`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#4CAF50',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Sim, sou eu!',
-    cancelButtonText: 'Não'
-  });
-
-  if (!result.isConfirmed) return;
-
   try {
     const res = await fetch(`${BASE_URL}/api/reveal`, {
       method: 'POST',
@@ -321,20 +307,17 @@ const revealSecretSanta = async () => {
     revealedName.value = data.drawnName;
     amigoSorteadoCache.value = data.drawnName;
     
-    // Atualiza storage
     localStorage.setItem('loggedInUser', JSON.stringify({
       name: nomeSalvo.value,
       drawnName: data.drawnName
     }));
     
-    setTimeout(() => { Swal.fire({ title: '📸 Hora do Print!', text: 'Tire um PRINT da tela agora!', icon: 'warning', confirmButtonColor: '#3085d6' }); }, 500);
     await fetchParticipants();
   } catch (error) { Swal.fire('Erro!', 'Problema ao conectar com o servidor.', 'error'); }
 };
 
 const mostrarAmigoSorteadoCache = () => {
   revealedName.value = amigoSorteadoCache.value;
-  setTimeout(() => { Swal.fire({ title: 'Lembrete!', text: 'Não esqueça de tirar o PRINT desta tela!', icon: 'info', confirmButtonColor: '#3085d6' }); }, 300);
 };
 
 const resetView = () => { revealedName.value = ''; };
