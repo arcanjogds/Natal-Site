@@ -167,10 +167,10 @@ const adicionarPresente = async () => {
           <label style="font-weight: bold; font-size: 14px; color: #333333;">Valor do Item (R$):</label>
           <input id="swal-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="R$ 0,00">
 
-          <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição (Opcional):</label>
+          <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
           <input id="swal-espec" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
 
-          <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja (Opcional):</label>
+          <label style="font-weight: bold; font-size: 14px; color: #333333;">Link da loja:</label>
           <input id="swal-link" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
           
           <button id="btn-add-mais" type="button" style="background: transparent; border: 2px dashed #2196f3; color: #2196f3; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold;">➕ Adicionar mais um item e formar um kit</button>
@@ -284,9 +284,9 @@ const adicionarSubItem = async (kit) => {
         <input id="swal-sub-item" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
         <label style="font-weight: bold; font-size: 14px; color: #333333;">Valor (R$):</label>
         <input id="swal-sub-valor" type="text" oninput="window.formatarMoeda(this)" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" placeholder="R$ 0,00">
-        <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição (Opcional):</label>
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Descrição:</label>
         <input id="swal-sub-desc" class="swal2-input" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;">
-        <label style="font-weight: bold; font-size: 14px; color: #333333;">Link (Opcional):</label>
+        <label style="font-weight: bold; font-size: 14px; color: #333333;">Link:</label>
         <input id="swal-sub-link" class="swal2-input" style="width: 100%; box-sizing: border-box;">
       </div>
     `,
