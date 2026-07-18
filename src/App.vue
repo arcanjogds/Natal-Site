@@ -390,7 +390,7 @@ const adminAlterarSenha = async (name) => {
 const regerarSorteio = async () => {
   const nomesArray = adminNamesList.value.split('\n').map(n => n.trim()).filter(n => n !== '');
   if (nomesArray.length < 3) return Swal.fire('Erro', 'Mínimo de 3 nomes.', 'warning');
-  const confirm = await Swal.fire({ title: 'Atenção!', text: 'Isso apaga o sorteio de todos e gera novas senhas!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#E53935', confirmButtonText: 'Refazer' });
+  const confirm = await Swal.fire({ title: 'Atenção!', text: 'Isso apaga o sorteio de todos!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#E53935', confirmButtonText: 'Refazer' });
   if (!confirm.isConfirmed) return;
   try {
     const res = await fetch(`${BASE_URL}/api/admin/shuffle`, {
@@ -398,7 +398,7 @@ const regerarSorteio = async () => {
     });
     const data = await res.json();
     if (data.success) {
-      Swal.fire('Sucesso!', 'Novo sorteio gerado! Senhas de 4 dígitos foram criadas para todos.', 'success');
+      Swal.fire('Sucesso!', 'Novo sorteio gerado!', 'success');
       await fetchParticipants();
       await carregarDadosAdmin();
     } else { Swal.fire('Erro', data.error, 'error'); }
