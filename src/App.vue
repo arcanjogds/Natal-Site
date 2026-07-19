@@ -334,7 +334,8 @@ const fazerLogin = async () => {
     }
     localStorage.setItem('loggedInUser', JSON.stringify({
       name: data.participant.name,
-      drawnName: data.participant.hasSeen ? data.participant.drawnName : ''
+      drawnName: data.participant.hasSeen ? data.participant.drawnName : '',
+      token: data.token
     }));
     senhaInput.value = '';
     
@@ -376,10 +377,14 @@ const abrirPerfil = async () => {
     if (!oldPassword || !newPassword) return Swal.fire('Erro', 'Preencha os campos', 'warning');
 
     try {
+      const userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
       const res = await fetch(`${BASE_URL}/api/change-password`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: nomeSalvo.value, oldPassword, newPassword })
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userObj.token}`
+        },
+        body: JSON.stringify({ oldPassword, newPassword }) // Removed name, backend uses JWT
       });
       const data = await res.json();
       if (!res.ok) return Swal.fire('Erro', data.error, 'error');
@@ -393,20 +398,25 @@ const abrirPerfil = async () => {
 
 const revealSecretSanta = async () => {
   try {
+    const userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
     const res = await fetch(`${BASE_URL}/api/reveal`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userObj.token}`
+      },
       body: JSON.stringify({ name: nomeSalvo.value })
     });
     const data = await res.json();
-    if (!res.ok) return Swal.fire('Acesso Bloqueado', data.error || 'Erro ao revelar.', 'error');
+    if (!res.ok) return Swal.fire('Acesso Bloqueado', data.error || 'Erro ao revelar. Faça login novamente.', 'error');
     
     revealedName.value = data.drawnName;
     amigoSorteadoCache.value = data.drawnName;
     
     localStorage.setItem('loggedInUser', JSON.stringify({
       name: nomeSalvo.value,
-      drawnName: data.drawnName
+      drawnName: data.drawnName,
+      token: userObj.token
     }));
     
     await fetchParticipants();

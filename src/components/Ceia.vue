@@ -84,6 +84,11 @@ const pratos = ref([]);
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const apiUrl = `${BASE_URL}/api/ceia`;
 
+const getAuthHeaders = () => {
+  const user = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` };
+};
+
 const nomesFamilia = computed(() => props.participants.map(p => p.name));
 
 const filtroCategoria = ref('Todas');
@@ -157,7 +162,7 @@ const assumirPrato = async (prato) => {
       
       await fetch(`${apiUrl}/${prato._id}/assumir`, { 
           method: 'PUT', 
-          headers: { 'Content-Type': 'application/json' }, 
+          headers: getAuthHeaders(), 
           body: JSON.stringify({ responsaveis: novosResponsaveis }) 
       });
       Swal.fire('Aí sim!', `${prato.nomePrato} está garantido por ${props.usuarioAtual}!`, 'success');
@@ -198,7 +203,7 @@ const adicionarPrato = async () => {
 
   if (formValues) {
     try {
-      await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nomePrato: formValues[0], categoria: formValues[1] }) });
+      await fetch(apiUrl, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ nomePrato: formValues[0], categoria: formValues[1] }) });
       Swal.fire('Adicionado!', 'O item entrou para o cardápio.', 'success');
       fetchPratos();
     } catch (error) { Swal.fire('Erro', 'Falha ao adicionar item.', 'error'); }
@@ -236,7 +241,7 @@ const editarPrato = async (prato) => {
 
   if (formValues) {
     try {
-      await fetch(`${apiUrl}/${prato._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formValues) });
+      await fetch(`${apiUrl}/${prato._id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(formValues) });
       Swal.fire('Atualizado!', 'Prato foi modificado.', 'success');
       fetchPratos();
     } catch (e) { Swal.fire('Erro', 'Não foi possível editar.', 'error'); }
@@ -246,7 +251,7 @@ const editarPrato = async (prato) => {
 const deletarPrato = async (id) => {
   const confirm = await Swal.fire({ title: 'Apagar prato?', text: "Remover este item do cardápio?", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sim, apagar!' });
   if (confirm.isConfirmed) {
-    try { await fetch(`${apiUrl}/${id}`, { method: 'DELETE' }); fetchPratos(); } 
+    try { await fetch(`${apiUrl}/${id}`, { method: 'DELETE', headers: getAuthHeaders() }); fetchPratos(); } 
     catch (error) { Swal.fire('Erro', 'Não foi possível apagar.', 'error'); }
   }
 };
@@ -259,7 +264,7 @@ const desistirPrato = async (prato, nomeDesistente) => {
       
       await fetch(`${apiUrl}/${prato._id}/assumir`, { 
           method: 'PUT', 
-          headers: { 'Content-Type': 'application/json' }, 
+          headers: getAuthHeaders(), 
           body: JSON.stringify({ responsaveis: novosResponsaveis }) 
       });
       Swal.fire('Pronto', `Você desistiu de ${prato.nomePrato}.`, 'success');
