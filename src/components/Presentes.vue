@@ -101,7 +101,7 @@ const props = defineProps({
 });
 
 const presentes = ref([]);
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://natal-bl3x.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const apiUrl = `${BASE_URL}/api/presentes`;
 
 const nomesFamilia = computed(() => props.participants.map(p => p.name));

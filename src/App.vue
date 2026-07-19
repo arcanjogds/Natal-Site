@@ -211,7 +211,7 @@ const getSnowflakeStyle = () => ({
   opacity: Math.random()
 });
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://natal-bl3x.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const activeTab = ref(localStorage.getItem('activeTab') || 'sorteio');
 
