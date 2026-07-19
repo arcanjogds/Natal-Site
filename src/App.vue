@@ -1,4 +1,5 @@
 <template>
+  <!-- NOTA DE SEGURANÇA: O CSP agora é gerenciado pelo vercel.json via HTTP Headers para maior segurança (e o compilador do Vue remove isso do build final!) -->
   <div class="snow-container">
     <div class="snowflake" v-for="n in 50" :key="n" :style="getSnowflakeStyle()"></div>
   </div>
