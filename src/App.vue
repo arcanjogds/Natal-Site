@@ -19,7 +19,7 @@
         </option>
       </select>
 
-      <input type="password" v-model="senhaInput" placeholder="Sua Senha (4 dígitos)" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1.5rem; box-sizing: border-box;" v-if="nomeSelecionadoGlobally" />
+      <input type="password" v-model="senhaInput" placeholder="Digite a sua senha" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1.5rem; box-sizing: border-box;" v-if="nomeSelecionadoGlobally" />
       
       <button @click="fazerLogin" class="btn-brilho" :disabled="!nomeSelecionadoGlobally || !senhaInput" style="width: 100%; padding: 15px; font-size: 1.1rem; cursor: pointer;" :style="(nomeSelecionadoGlobally && senhaInput) ? '' : 'opacity: 0.5; cursor: not-allowed;'">
         Entrar
