@@ -104,6 +104,11 @@ const presentes = ref([]);
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const apiUrl = `${BASE_URL}/api/presentes`;
 
+const getAuthHeaders = () => {
+  const user = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token || ''}` };
+};
+
 const nomesFamilia = computed(() => props.participants.map(p => p.name));
 
 const filtroFamiliar = ref(props.filtroInicial);
@@ -347,7 +352,7 @@ const adicionarPresente = async (isKit = false) => {
         isKit: isKit,
         itens: finalResult.finalItens
       };
-      await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      await fetch(apiUrl, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) });
       Swal.fire('Pronto!', 'Pedido criado!', 'success');
       fetchPresentes();
     } catch (error) { Swal.fire('Erro', 'Falha ao conectar.', 'error'); }
@@ -373,7 +378,7 @@ const editarKit = async (kit) => {
 
   if (formValues) {
     try {
-      await fetch(`${apiUrl}/${kit._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formValues) });
+      await fetch(`${apiUrl}/${kit._id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(formValues) });
       Swal.fire('Atualizado!', 'Pedido modificado.', 'success');
       fetchPresentes();
     } catch (e) { Swal.fire('Erro', 'Falha ao conectar.', 'error'); }
@@ -423,7 +428,7 @@ const editarIndividual = async (kit) => {
     try {
       await fetch(`${apiUrl}/${kit._id}`, { 
         method: 'PUT', 
-        headers: { 'Content-Type': 'application/json' }, 
+        headers: getAuthHeaders(), 
         body: JSON.stringify({ itens: [formValues], nomeKit: formValues.item }) 
       });
       Swal.fire('Atualizado!', 'Item modificado.', 'success');
@@ -470,7 +475,7 @@ const adicionarSubItem = async (kit) => {
   if (formValues) {
     try {
       const novosItens = [...(kit.itens || []), formValues];
-      await fetch(`${apiUrl}/${kit._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ itens: novosItens }) });
+      await fetch(`${apiUrl}/${kit._id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ itens: novosItens }) });
       fetchPresentes();
     } catch (e) { Swal.fire('Erro', 'Falha ao salvar.', 'error'); }
   }
@@ -481,7 +486,7 @@ const deletarSubItem = async (kit, idx) => {
   if (confirm.isConfirmed) {
     try {
       const novosItens = kit.itens.filter((_, i) => i !== idx);
-      await fetch(`${apiUrl}/${kit._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ itens: novosItens }) });
+      await fetch(`${apiUrl}/${kit._id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ itens: novosItens }) });
       fetchPresentes();
     } catch (e) { Swal.fire('Erro', 'Falha ao apagar.', 'error'); }
   }
@@ -490,7 +495,7 @@ const deletarSubItem = async (kit, idx) => {
 const deletarPresente = async (id) => {
   const confirm = await Swal.fire({ title: 'Apagar pedido inteiro?', text: "Isso removerá todos os itens deste kit.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sim, apagar!' });
   if (confirm.isConfirmed) {
-    try { await fetch(`${apiUrl}/${id}`, { method: 'DELETE' }); fetchPresentes(); } 
+    try { await fetch(`${apiUrl}/${id}`, { method: 'DELETE', headers: getAuthHeaders() }); fetchPresentes(); } 
     catch (error) { Swal.fire('Erro', 'Não foi possível apagar.', 'error'); }
   }
 };
